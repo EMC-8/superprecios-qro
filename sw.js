@@ -11,7 +11,7 @@
  *  - Navegaciones: si la red falla, se sirve el index cacheado.
  */
 
-const CACHE_NAME = 'superprecios-qro-v6';
+const CACHE_NAME = 'superprecios-qro-v7';
 
 // Si algo de aquí falla, falla TODO el precache (cache.addAll es atómico).
 // Solo debe contener rutas que de verdad existan en el repo.

@@ -1155,10 +1155,10 @@ function renderCatalog() {
         ` : ''}
         
         <div class="price-mini-grid">
-          ${storePrices.slice(0, 3).map(([sid, price]) => `
-            <div class="mini-price-pill">
-              <span class="pill-store">${SUPERMARKETS[sid].shortName}</span>
-              <span class="pill-val">$${price.toFixed(2)}</span>
+          ${storePrices.map(([sid, price], idx) => `
+            <div class="mini-price-pill ${idx === 0 ? 'is-best' : ''}">
+              <span class="pill-store" ${idx === 0 ? `style="color: ${SUPERMARKETS[sid].accentColor || SUPERMARKETS[sid].color}; font-weight: bold;"` : ''}>${SUPERMARKETS[sid].shortName}</span>
+              <span class="pill-val" ${idx === 0 ? 'style="color: var(--primary); font-weight: 800;"' : ''}>$${price.toFixed(2)}</span>
             </div>
           `).join('')}
         </div>
