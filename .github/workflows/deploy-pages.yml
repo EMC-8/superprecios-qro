@@ -1,0 +1,49 @@
+name: Deploy demo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Stage public site allowlist
+        run: |
+          rm -rf _site
+          mkdir -p _site/css _site/js _site/assets _site/data
+          cp index.html manifest.webmanifest sw.js _site/
+          cp -R css/. _site/css/
+          cp -R js/. _site/js/
+          cp -R assets/. _site/assets/
+          # data/ es obligatorio: desde que los precios salieron de js/data.js,
+          # sin este directorio el sitio publica sin un solo precio.
+          cp -R data/. _site/data/
+      - name: Verificar que el sitio publicable esta completo
+        run: |
+          for f in index.html sw.js manifest.webmanifest data/prices.json js/app.js js/prices.js js/checkout.js assets/icons/icon-192.png; do
+            test -f "_site/$f" || { echo "FALTA _site/$f"; exit 1; }
+          done
+          echo "Sitio completo."
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
