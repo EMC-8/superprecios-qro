@@ -76,7 +76,7 @@ npx serve .
 
 ## Demo pública
 
-El repositorio publica la rama `main` en GitHub Pages mediante GitHub Actions. En GitHub, configura **Settings → Pages → Source: GitHub Actions** la primera vez. Cada push posterior actualizará el demo.
+El repositorio incluye un workflow de GitHub Pages. Un administrador de `EMC-8` debe habilitar Pages para este repositorio y permitir que GitHub Actions cree el sitio. Después se ejecuta **Deploy demo to GitHub Pages** desde la pestaña Actions. El workflow se deja manual para evitar despliegues fallidos mientras esa configuración de organización no esté habilitada.
 
 ## Flujo de compra oficial
 
