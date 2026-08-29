@@ -19,10 +19,12 @@ te dice dónde comprar cada cosa.
 
 | Pieza | Estado |
 |---|---|
-| Optimizador (3 estrategias) | ✅ completo, 30 pruebas |
+| Optimizador (3 estrategias) | ✅ completo, 41 pruebas |
 | Parser de texto libre | ✅ completo, con conversión de unidades a presentaciones |
 | Selección de cadenas y sucursal | ✅ completo, persistida |
 | Modo Supermercado (checklist) | ✅ completo |
+| Compra Guiada (handoff oficial) | ✅ integrada desde upstream |
+| Canasta compartible por enlace | ✅ completa, con validación de entrada |
 | Catálogo con EAN-13 | ✅ 19 productos |
 | PWA offline | ✅ Service Worker con app shell cache-first |
 | Avisos de calidad de datos | ✅ precios viejos, sin precio, copia local |
@@ -113,7 +115,44 @@ lo más probable es que el cambio esté mal, no la prueba.
   desvía con cualquier dato raro) ni el mínimo (promete un precio que el usuario
   no va a encontrar donde llegue).
 
-### 2.5 Separación catálogo / precios
+### 2.5 Este repo fusiona dos ramas que se habían separado
+
+En agosto 2026 el proyecto se bifurcó: EMC-8 (Gotchy, pgarcia-debug) y este fork
+reescribieron la app en paralelo desde el mismo commit inicial. **Ya están
+fusionados**, tomando de cada lado lo que resolvía mejor el problema:
+
+| Viene de | Qué |
+|---|---|
+| Este fork | 3 estrategias de optimización, parser con presentaciones, precios separados del código, base de datos, tests, scraper PROFECO, Vercel |
+| Upstream | Compra Guiada, handoff al sitio oficial, perfil de entrega, canasta compartible, documentos de planeación (`.planning/`, `specs/`) |
+
+Dos cosas que hay que saber de esa fusión:
+
+- **Upstream había eliminado la compra dividida y la ruta de 2 tiendas** para
+  pivotear a "comparar y mandar a comprar en línea". Aquí conviven: el
+  optimizador decide *qué* comprar en cada tienda y la guía ayuda a
+  *encontrarlo*. Por eso `itemsAsignadosA()` recorre sólo lo que el optimizador
+  asignó a esa tienda, no la lista completa.
+- **El parser de upstream no tenía la conversión de presentaciones.** En su
+  versión `30 huevos` daba 30 carteras y `500g queso panela` daba 0.5 piezas.
+  No reintroduzcas su `parseLine`.
+
+### 2.6 Todo lo que entra por URL es contenido de terceros
+
+Desde que existe la canasta compartible, el nombre de un producto personalizado
+lo escribe quien arma el enlace, no quien lo abre. Hay dos defensas y ambas
+tienen que seguir en pie:
+
+1. `readSharedCart()` (checkout.js) reconstruye los productos del catálogo
+   **desde el catálogo local**, usando el id sólo para buscarlos. Un enlace no
+   puede inventar un producto, una presentación ni un precio.
+2. `escaparHtml()` (app.js) escapa todo nombre antes de interpolarlo. Está
+   verificado: un enlace con `<img src=x onerror=...>` se pinta como texto y no
+   ejecuta nada.
+
+Si agregas un render nuevo que muestre nombres de productos, **escápalo**.
+
+### 2.7 Separación catálogo / precios
 
 `js/data.js` describe **qué** existe (EAN, nombre, presentación, alias).
 `data/prices.json` dice **cuánto cuesta**.
@@ -135,6 +174,8 @@ vercel.json           Cabeceras por ruta (sw.js sin caché, precios revalidados)
 
 js/
   app.js              Controlador, estado y render. El archivo grande.
+  checkout.js         Handoff oficial y canasta compartible. ENTRADA INSEGURA.
+  profile.js          Preferencia de entrega. Sin datos sensibles.
   data.js             Catálogo de productos y cadenas. Sin precios.
   prices.js           Carga de precios: Supabase → prices.json → caché local.
                       ← El contrato de datos vive documentado aquí arriba.
@@ -233,10 +274,9 @@ npm run seed               # regenera supabase/seed.sql
 
 - `js/app.js` pasa de 1,100 líneas y mezcla estado, render y eventos. Si va a
   crecer más, conviene separar render por pestaña antes de agregar features.
-- El render usa `innerHTML` con plantillas. Los datos vienen del propio catálogo
-  y de la base, no de entrada libre de terceros, pero si algún día se acepta
-  contenido de usuarios (ej. precios colaborativos) **hay que escapar** antes de
-  interpolar.
+- El render usa `innerHTML` con plantillas. Ya hay escapado (`escaparHtml`) en
+  los puntos donde entra contenido de terceros; si agregas otro render que
+  muestre nombres de producto, aplícalo. Ver sección 2.6.
 - `icon-512.png` pesa 261 KB porque el degradado no comprime bien. Funciona;
   pasarlo por un optimizador PNG estaría bien.
 - El registro del Service Worker nunca se pudo verificar en el navegador de
@@ -254,6 +294,8 @@ npm run seed               # regenera supabase/seed.sql
 | `81c8828` | Separa precios del código, endurece el optimizador ante datos faltantes, selección de tiendas, tests |
 | `708ed7d` | Esquema de base de datos, seed generado, Supabase como fuente en el cliente |
 | `6fd66cb` | Pipeline de scraping, workflow de CI, documentación de despliegue |
+| `430f7d4` | Este documento |
+| *(fusión)* | Integra Compra Guiada, perfil y canasta compartible desde upstream |
 
 El remoto `upstream` apunta al repositorio original `EMC-8/superprecios-qro`.
 `origin` apunta a `JETER3/superprecios-qro`, que es donde se está trabajando.

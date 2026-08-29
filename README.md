@@ -27,9 +27,11 @@
 2. **🏬 Selección de tiendas y sucursal**: eliges a qué cadenas puedes ir y qué sucursal de cada una te queda cerca. La optimización sólo considera esas, y la elección se recuerda entre sesiones.
 3. **✍️ Parser de texto libre**: escribe o pega la lista en lenguaje natural (`2 leche lala, 500g queso panela, 30 huevos, 1 papel de bano`). Reconoce cantidades, unidades y marcas, y **convierte medidas a presentaciones reales de venta**: `500g queso panela` → 2 bloques de 400 g; `30 huevos` → 1 cartera de 30. La conversión se muestra en la lista para que sea auditable.
 4. **🛒 Modo Supermercado**: checklist interactivo filtrado por tienda para ir tachando productos en los pasillos.
-5. **📲 PWA offline**: el app shell se sirve desde caché y los precios usan red-primero con respaldo local. Funciona sin señal dentro del súper. Instalable en Android, iOS y escritorio.
-6. **🏷️ Catálogo con EAN-13**: productos con su código GTIN/EAN-13 y enlace de verificación.
-7. **🔎 Honestidad de datos**: la app avisa cuando los precios están viejos, cuando está usando una copia local por falta de conexión, cuando un producto no tiene precio en las tiendas elegidas, y marca con `≈` todo lo que sea estimado.
+5. **🧭 Compra Guiada (handoff al sitio oficial)**: para comprar en línea. Recorre **sólo los productos que el optimizador asignó a esa tienda**, con el término de búsqueda listo para copiar, el EAN, y el enlace directo a la búsqueda oficial. Las cadenas no ofrecen carrito universal, así que la app no simula ser el retailer: el login, la sucursal, el domicilio y el pago ocurren únicamente en su dominio.
+6. **🔗 Canasta compartible**: un enlace reconstruye tu lista en el dispositivo de otra persona. Viaja en el fragmento de la URL (no llega al servidor) y **no lleva precios**: los productos se reconstruyen desde el catálogo local para que un enlace manipulado no pueda inventar precios ni productos.
+7. **📲 PWA offline**: el app shell se sirve desde caché y los precios usan red-primero con respaldo local. Funciona sin señal dentro del súper. Instalable en Android, iOS y escritorio.
+8. **🏷️ Catálogo con EAN-13**: productos con su código GTIN/EAN-13 y enlace de verificación.
+9. **🔎 Honestidad de datos**: la app avisa cuando los precios están viejos, cuando está usando una copia local por falta de conexión, cuando un producto no tiene precio en las tiendas elegidas, y marca con `≈` todo lo que sea estimado.
 
 ---
 
@@ -63,6 +65,8 @@ superprecios-qro/
 │   ├── app.js                  # Controlador principal y gestión de estado
 │   ├── data.js                 # Catálogo (EAN, presentación, alias) y cadenas/sucursales
 │   ├── prices.js               # Carga, validación y caché de precios  ← contrato del scraper
+│   ├── checkout.js             # Handoff al sitio oficial y canasta compartible
+│   ├── profile.js              # Preferencia de entrega (local, sin datos sensibles)
 │   ├── optimizer.js            # Motor de cálculo y optimización
 │   ├── parser.js               # Parser de lenguaje natural
 │   └── pwa.js                  # Service Worker y banner de instalación
@@ -79,7 +83,8 @@ superprecios-qro/
 │   └── generate-seed.mjs       # Regenera supabase/seed.sql desde el catálogo
 ├── test/
 │   ├── optimizer.test.mjs
-│   └── parser.test.mjs
+│   ├── parser.test.mjs
+│   └── checkout.test.mjs
 └── assets/icons/               # icon.svg + icon-192.png + icon-512.png
 ```
 
@@ -105,7 +110,7 @@ Abre `http://localhost:8080`. También `npm start`, o `npx serve .`.
 npm test
 ```
 
-30 pruebas sobre el parser (unidades, presentaciones, alias) y el optimizador (precios faltantes, cobertura, ahorro).
+41 pruebas sobre el parser (unidades, presentaciones, alias), el optimizador (precios faltantes, cobertura, ahorro) y el handoff (ida y vuelta del enlace compartido, rechazo de enlaces manipulados).
 
 ### Validar la tabla de precios
 

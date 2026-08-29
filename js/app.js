@@ -7,6 +7,11 @@ import { parseShoppingListText } from './parser.js';
 import { calculateOptimizations } from './optimizer.js';
 import { loadPriceTable } from './prices.js';
 import { initPWA, promptInstallApp } from './pwa.js';
+import {
+  buildShareUrl, readSharedCart, clearSharedCartFromUrl, copyText,
+  formatStoreList, formatQuantity, getOfficialProductUrl, getOfficialStoreUrl
+} from './checkout.js';
+import { loadShopperProfile, saveShopperProfile } from './profile.js';
 
 // --- ESTADO GLOBAL DE LA APP ---
 const AppState = {
@@ -17,6 +22,8 @@ const AppState = {
   searchQuery: '',
   selectedCategory: 'all',
   activeStoreFilter: 'all',
+  guide: null,               // { storeId, index, done } de la compra guiada
+  profile: null,             // preferencia de entrega (js/profile.js)
   priceTable: null,          // tabla de precios cargada (js/prices.js)
   enabledStores: [],         // tiendas que el usuario está dispuesto a visitar
   selectedBranches: {}       // { storeId: índice de sucursal }
@@ -28,6 +35,7 @@ const STORAGE_KEY = 'superprecios_qro_list_v3';
 const CHECKED_KEY = 'superprecios_qro_checked_v3';
 const STORES_KEY = 'superprecios_qro_stores_v1';
 const BRANCHES_KEY = 'superprecios_qro_branches_v1';
+const GUIDE_KEY = 'superprecios_qro_guide_v1';
 
 // --- INICIALIZACIÓN ---
 document.addEventListener('DOMContentLoaded', async () => {
@@ -41,6 +49,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   setupEventListeners();
   renderStoreSelector();
+
+  // Canasta compartida por enlace: se importa antes del primer render.
+  // Todo lo que trae es contenido de terceros; readSharedCart lo reconstruye
+  // desde el catálogo local y renderGuide/renderAll lo escapan al pintarlo.
+  const compartida = readSharedCart();
+  if (compartida && compartida.length > 0) {
+    AppState.shoppingList = compartida;
+    AppState.checkedItems = {};
+    saveState();
+    clearSharedCartFromUrl();
+    showToast(`🔗 Canasta compartida cargada: ${compartida.length} productos`);
+  }
 
   // Sin precios no hay nada que optimizar, así que se cargan antes del primer render.
   AppState.priceTable = await loadPriceTable();
@@ -139,6 +159,8 @@ function loadSavedState() {
       : Object.keys(SUPERMARKETS);
 
     AppState.selectedBranches = JSON.parse(localStorage.getItem(BRANCHES_KEY) || '{}') || {};
+    AppState.guide = JSON.parse(localStorage.getItem(GUIDE_KEY) || 'null');
+    AppState.profile = loadShopperProfile();
   } catch (e) {
     console.error('Error cargando estado local:', e);
     if (AppState.enabledStores.length === 0) AppState.enabledStores = Object.keys(SUPERMARKETS);
@@ -151,6 +173,7 @@ function saveState() {
     localStorage.setItem(CHECKED_KEY, JSON.stringify(AppState.checkedItems));
     localStorage.setItem(STORES_KEY, JSON.stringify(AppState.enabledStores));
     localStorage.setItem(BRANCHES_KEY, JSON.stringify(AppState.selectedBranches));
+    localStorage.setItem(GUIDE_KEY, JSON.stringify(AppState.guide));
   } catch (e) {
     console.error('Error guardando estado local:', e);
   }
@@ -262,7 +285,9 @@ export function switchTab(tabId) {
     pane.classList.toggle('active', pane.id === `tab-${tabId}`);
   });
 
-  if (tabId === 'catalog') {
+  if (tabId === 'guide') {
+    renderGuide();
+  } else if (tabId === 'catalog') {
     renderCatalog();
   } else if (tabId === 'supermarket') {
     renderSupermarketMode();
@@ -377,7 +402,7 @@ function renderDataWarnings(opt) {
   }
 
   if (opt && opt.unpricedItems && opt.unpricedItems.length > 0) {
-    const nombres = opt.unpricedItems.map(i => i.name).join(', ');
+    const nombres = opt.unpricedItems.map(i => escaparHtml(i.name)).join(', ');
     warnings.push({
       level: 'warn',
       text: `Sin precio en las tiendas seleccionadas (no entran al total): <strong>${nombres}</strong>.`
@@ -403,6 +428,7 @@ function renderDataWarnings(opt) {
 function renderAll() {
   updateCartBadge();
   renderStoreSelector();
+  renderGuide();
   renderShoppingListEditor();
   renderOptimizationResults();
   renderCatalog();
@@ -468,7 +494,7 @@ function renderShoppingListEditor() {
     return `
       <div class="list-item-card" data-index="${index}">
         <div class="item-info">
-          <span class="item-name">${item.name}${item.isEstimatedPrice ? ' <span class="estimated-tag">≈</span>' : ''}</span>
+          <span class="item-name">${escaparHtml(item.name)}${item.isEstimatedPrice ? ' <span class="estimated-tag">≈</span>' : ''}</span>
           <span class="item-meta">Categoría: ${getCategoryName(item.category)} • Cantidad: <strong>${formattedQty}</strong></span>
           ${notes.length ? `<span class="item-note">${notes.join(' • ')}</span>` : ''}
         </div>
@@ -621,7 +647,7 @@ function renderOptimizationResults() {
       return `
         <div class="store-item-row">
           <div class="item-detail">
-            <span class="item-name">${it.name}</span>
+            <span class="item-name">${escaparHtml(it.name)}</span>
             <span class="item-qty">${formattedQty} × $${it.unitPrice.toFixed(2)}</span>
           </div>
           <div class="item-price">
@@ -648,13 +674,17 @@ function renderOptimizationResults() {
         </div>
         <div class="store-card-footer">
           <span>${group.items.length} ${group.items.length === 1 ? 'producto' : 'productos'} recomendados aquí</span>
-          <button class="btn-goto-store" onclick="window.AppState.selectStoreMode('${store.id}')">Ir a comprar ➔</button>
+          <div class="store-card-cta">
+            <button class="btn-goto-store" data-modo-super="${store.id}">🛒 Ir a la tienda</button>
+            <button class="btn-goto-store is-primary" data-guia="${store.id}">🧭 Comprar en sitio oficial</button>
+          </div>
         </div>
       </div>
     `;
   }).join('');
 
-  container.innerHTML = `
+  const pintar = (html) => { container.innerHTML = html; };
+  pintar(`
     <!-- Tarjeta de Ahorro Destacada -->
     <div class="savings-hero-card">
       <div class="savings-badge">${strategyBadge}</div>
@@ -706,7 +736,18 @@ function renderOptimizationResults() {
     <div class="store-cards-grid">
       ${storeCardsHtml}
     </div>
-  `;
+  `);
+
+  container.querySelectorAll('[data-modo-super]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      AppState.activeStoreFilter = btn.dataset.modoSuper;
+      switchTab('supermarket');
+    });
+  });
+
+  container.querySelectorAll('[data-guia]').forEach(btn => {
+    btn.addEventListener('click', () => abrirGuia(btn.dataset.guia));
+  });
 }
 
 // --- MODO SUPERMERCADO (CHECKLIST INTERACTIVO) ---
@@ -784,7 +825,7 @@ function renderSupermarketMode() {
         <label class="checklist-item ${isChecked ? 'is-checked' : ''}" data-check-key="${checkKey}">
           <input type="checkbox" ${isChecked ? 'checked' : ''} class="item-checkbox" data-check-key="${checkKey}">
           <div class="item-text">
-            <span class="item-title">${item.name}</span>
+            <span class="item-title">${escaparHtml(item.name)}</span>
             <span class="item-sub">${formattedQty} • $${item.unitPrice.toFixed(2)} c/u</span>
           </div>
           <span class="item-total-val">$${item.subtotal.toFixed(2)}</span>
@@ -849,7 +890,173 @@ function renderSupermarketMode() {
   });
 }
 
-// --- CATÁLOGO DE PRODUCTOS (TAB: CATALOG) ---
+// --- COMPRA GUIADA (HANDOFF AL SITIO OFICIAL) ---
+
+/**
+ * Productos que le tocan a una tienda segun la estrategia activa.
+ *
+ * Aqui se juntan las dos mitades del producto: el optimizador decide QUE
+ * comprar en cada tienda y la guia ayuda a ENCONTRARLO. Recorrer la lista
+ * completa mandaria al usuario a buscar en Chedraui cosas que el optimizador
+ * ya asigno a Aurrera.
+ */
+function itemsAsignadosA(storeId) {
+  const opt = calculateOptimizations(AppState.shoppingList, optimizationOptions());
+  if (!opt || opt.error) return [];
+
+  if (AppState.strategy === 'single') {
+    return opt.bestSingleStore.store.id === storeId ? opt.bestSingleStore.items : [];
+  }
+
+  const grupos = AppState.strategy === 'two-stores' && opt.twoStoresCombo
+    ? opt.twoStoresCombo.storeGroups
+    : opt.multiStore.storeGroups;
+
+  return (grupos.find(g => g.store.id === storeId) || { items: [] }).items;
+}
+
+function abrirGuia(storeId) {
+  AppState.guide = { storeId, index: 0, done: {} };
+  saveState();
+  switchTab('guide');
+}
+
+function renderGuide() {
+  const host = document.getElementById('guide-container');
+  if (!host) return;
+
+  const store = AppState.guide && SUPERMARKETS[AppState.guide.storeId];
+  if (!store) {
+    host.innerHTML = `
+      <div class="empty-state-card">
+        <div class="empty-icon">&#129517;</div>
+        <h3>Compra guiada</h3>
+        <p>Elige una tienda desde <strong>Ahorro &amp; Ruta</strong> con el boton
+           "Comprar en sitio oficial". Tu avance se guarda en este dispositivo.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const items = itemsAsignadosA(store.id);
+  if (items.length === 0) {
+    host.innerHTML = `
+      <div class="empty-state-card">
+        <div class="empty-icon">&#129335;</div>
+        <h3>Nada asignado a ${escaparHtml(store.shortName)}</h3>
+        <p>Con la estrategia actual, el optimizador no manda ningun producto a esta tienda.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const i = Math.min(AppState.guide.index, items.length - 1);
+  const item = items[i];
+  const listos = Object.keys(AppState.guide.done).length;
+  const pct = Math.round((listos / items.length) * 100);
+  const tieneEan = /^\d{8,14}$/.test(item.ean || '');
+  const entrega = AppState.profile?.fulfillment === 'pickup' ? 'pickup' : 'delivery';
+
+  host.innerHTML = `
+    <section class="guide-card" style="--store-color: ${store.color}">
+      <span class="checkout-eyebrow">Compra guiada &middot; sitio oficial</span>
+      <h2 style="color: ${store.color}">${escaparHtml(store.name)}</h2>
+      <p class="guide-explainer">
+        Los supermercados no ofrecen un carrito universal, asi que esta app no puede
+        llenar el tuyo. Lo que si hace es que no tengas que reescribir la lista: el
+        inicio de sesion, la sucursal, la disponibilidad, el domicilio y el pago
+        ocurren unicamente en el dominio oficial de la tienda.
+      </p>
+
+      <div class="guide-fulfillment">
+        <span>Modalidad:</span>
+        <button class="chip-btn ${entrega === 'delivery' ? 'active' : ''}" data-entrega="delivery">A domicilio</button>
+        <button class="chip-btn ${entrega === 'pickup' ? 'active' : ''}" data-entrega="pickup">Recoger en tienda</button>
+      </div>
+
+      <div class="guide-progress" aria-label="Progreso"><span style="width: ${pct}%"></span></div>
+      <p class="guide-count"><strong>${listos}/${items.length} listos</strong> &middot; Producto ${i + 1} de ${items.length}</p>
+
+      <article class="guide-product">
+        <h3>${escaparHtml(item.name)}</h3>
+        <p class="guide-qty">${escaparHtml(formatQuantity(item))} &middot; $${item.unitPrice.toFixed(2)} c/u estimado</p>
+        <label>Termino recomendado para buscar
+          <input readonly value="${escaparHtml(item.name)}" aria-label="Termino de busqueda recomendado">
+        </label>
+        <div class="guide-actions">
+          <button class="primary-btn" data-copy-term>Copiar termino</button>
+          <a class="secondary-btn" href="${escaparHtml(getOfficialProductUrl(store, item))}"
+             target="_blank" rel="noopener noreferrer">Abrir busqueda oficial &#8599;</a>
+          ${tieneEan
+            ? `<button class="secondary-btn" data-copy-ean>Copiar EAN</button>`
+            : `<span class="hint">Sin EAN valido: usa el termino legible.</span>`}
+        </div>
+      </article>
+
+      <div class="guide-footer">
+        <button class="secondary-btn" data-copy-all>Copiar lista completa</button>
+        <button class="secondary-btn" data-share>Compartir canasta</button>
+        <button class="primary-btn" data-next>
+          ${AppState.guide.done[i] ? 'Avanzar al siguiente' : 'Marcar listo y avanzar'}
+        </button>
+      </div>
+
+      <a class="official-link" href="${escaparHtml(getOfficialStoreUrl(store))}"
+         target="_blank" rel="noopener noreferrer">Ir al sitio oficial de ${escaparHtml(store.shortName)} &#8599;</a>
+    </section>
+  `;
+
+  host.querySelectorAll('[data-entrega]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      AppState.profile = saveShopperProfile({
+        fulfillment: btn.dataset.entrega,
+        updatedAt: new Date().toISOString()
+      });
+      renderGuide();
+    });
+  });
+
+  host.querySelector('[data-copy-term]').addEventListener('click', async () => {
+    await copyText(item.name);
+    showToast('Termino copiado');
+  });
+
+  const btnEan = host.querySelector('[data-copy-ean]');
+  if (btnEan) {
+    btnEan.addEventListener('click', async () => {
+      await copyText(item.ean);
+      showToast('EAN copiado');
+    });
+  }
+
+  host.querySelector('[data-copy-all]').addEventListener('click', async () => {
+    await copyText(formatStoreList(store, items, entrega));
+    showToast('Lista copiada');
+  });
+
+  host.querySelector('[data-share]').addEventListener('click', async () => {
+    const url = buildShareUrl(AppState.shoppingList);
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Mi canasta - SuperPrecios QRO', url });
+        return;
+      } catch (e) {
+        // Cancelado por el usuario o no permitido: se copia y ya.
+      }
+    }
+    await copyText(url);
+    showToast('Enlace copiado');
+  });
+
+  host.querySelector('[data-next]').addEventListener('click', () => {
+    AppState.guide.done[i] = true;
+    AppState.guide.index = Math.min(i + 1, items.length - 1);
+    saveState();
+    renderGuide();
+  });
+}
+
+// --- CATALOGO DE PRODUCTOS (TAB: CATALOG) ---
 function renderCatalog() {
   const container = document.getElementById('catalog-items-grid');
   const categoryChipsContainer = document.getElementById('category-chips');
@@ -1047,6 +1254,24 @@ function mergeItemsIntoList(newItems) {
 }
 
 // --- UTILIDADES ---
+
+/**
+ * Escapa texto antes de interpolarlo en HTML.
+ *
+ * Hace falta desde que existen las canastas compartidas por URL: el nombre de
+ * un producto personalizado lo escribe quien arma el enlace, no quien lo abre.
+ * Sin esto, un enlace con `<img onerror=...>` en el nombre ejecutaría script en
+ * el navegador de quien lo recibe.
+ */
+function escaparHtml(valor) {
+  return String(valor ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function getCategoryName(catId) {
   const cat = CATEGORIES.find(c => c.id === catId);
   return cat ? cat.name : 'Varios';
@@ -1104,10 +1329,6 @@ function shareListToWhatsApp() {
   window.open(url, '_blank');
 }
 
-// Exponer selector global para botones inline
-window.AppState = {
-  selectStoreMode: (storeId) => {
-    AppState.activeStoreFilter = storeId;
-    switchTab('supermarket');
-  }
-};
+// El global de botones inline se retiró: las tarjetas ahora usan addEventListener,
+// que es lo que permite escapar el contenido sin que un nombre con comillas
+// rompa el atributo onclick.
