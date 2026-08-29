@@ -114,6 +114,12 @@ lo más probable es que el cambio esté mal, no la prueba.
 - **Cuando varias sucursales difieren, se usa la mediana**, no el promedio (se
   desvía con cualquier dato raro) ni el mínimo (promete un precio que el usuario
   no va a encontrar donde llegue).
+- **El checkout es de cada cadena.** La app genera enlaces oficiales y copia la
+  lista; nunca simula crear un carrito del retailer ni promete disponibilidad,
+  costo de envío o condiciones de entrega.
+- **La app es sin dependencias, módulos ES estáticos.** Debe poder desplegarse en
+  cualquier hosting estático. Antes de subir, se valida con un servidor HTTP
+  local, no abriendo el HTML como archivo.
 
 ### 2.5 Este repo fusiona dos ramas que se habían separado
 
@@ -124,7 +130,7 @@ fusionados**, tomando de cada lado lo que resolvía mejor el problema:
 | Viene de | Qué |
 |---|---|
 | Este fork | 3 estrategias de optimización, parser con presentaciones, precios separados del código, base de datos, tests, scraper PROFECO, Vercel |
-| Upstream | Compra Guiada, handoff al sitio oficial, perfil de entrega, canasta compartible, documentos de planeación (`.planning/`, `specs/`) |
+| Upstream | Compra Guiada, handoff al sitio oficial, perfil de entrega, canasta compartible, las URLs oficiales de cada cadena, despliegue a GitHub Pages |
 
 Dos cosas que hay que saber de esa fusión:
 
@@ -136,6 +142,12 @@ Dos cosas que hay que saber de esa fusión:
 - **El parser de upstream no tenía la conversión de presentaciones.** En su
   versión `30 huevos` daba 30 carteras y `500g queso panela` daba 0.5 piezas.
   No reintroduzcas su `parseLine`.
+- **Al limpiar se removieron `.planning/`, `.specify/`, `specs/` y `NAPKIN.md`.**
+  Los primeros describían el producto anterior (sin optimización de rutas) y
+  habrían confundido a quien llegara; `.specify/` era andamiaje de tooling ajeno
+  al producto. Las cuatro reglas útiles de `NAPKIN.md` viven ahora en los
+  invariantes de la sección 2.4. Todo sigue en el historial de git:
+  `git show af6f134:.planning/PROJECT.md`
 
 ### 2.6 Todo lo que entra por URL es contenido de terceros
 
