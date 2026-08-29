@@ -29,6 +29,7 @@
  */
 
 import { SUPERMARKETS, PRODUCTS_CATALOG } from './data.js';
+import { SUPABASE, isSupabaseConfigured } from './config.js';
 
 export const PRICES_URL = './data/prices.json';
 const CACHE_KEY = 'superprecios_qro_prices_cache_v1';
@@ -126,27 +127,62 @@ export function createPriceTable(products, meta, origin, issues = []) {
 }
 
 /**
- * Carga los precios: red primero, caché local como respaldo.
+ * Pide el snapshot a Supabase.
+ * La función `prices_snapshot()` devuelve exactamente el mismo documento que
+ * data/prices.json, así que a partir de aquí todo el código es el mismo.
+ */
+async function fetchFromSupabase(fetchImpl) {
+  const res = await fetchImpl(`${SUPABASE.url}/rest/v1/rpc/prices_snapshot`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE.publishableKey,
+      'Authorization': `Bearer ${SUPABASE.publishableKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: '{}'
+  });
+  if (!res.ok) throw new Error(`Supabase HTTP ${res.status}`);
+  return res.json();
+}
+
+async function fetchFromStaticFile(fetchImpl) {
+  const res = await fetchImpl(PRICES_URL, { cache: 'no-cache' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+/**
+ * Carga los precios probando fuentes en orden:
+ *   1. Supabase (si está configurado): el dato más fresco.
+ *   2. data/prices.json: respaldo versionado, precacheado por el Service Worker.
+ *   3. Copia en localStorage: último recurso cuando no hay red.
+ *
  * Nunca lanza: si todo falla devuelve una tabla vacía con origin 'none'
  * para que la UI pueda decirlo en vez de mostrar totales inventados.
  */
 export async function loadPriceTable(fetchImpl = globalThis.fetch) {
-  try {
-    const res = await fetchImpl(PRICES_URL, { cache: 'no-cache' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const raw = await res.json();
-    const { products, meta, issues } = sanitizePriceTable(raw);
-    if (Object.keys(products).length === 0) throw new Error('Tabla de precios vacía tras validar');
+  const sources = [];
+  if (isSupabaseConfigured()) {
+    sources.push({ origin: 'supabase', load: () => fetchFromSupabase(fetchImpl) });
+  }
+  sources.push({ origin: 'network', load: () => fetchFromStaticFile(fetchImpl) });
 
+  for (const source of sources) {
     try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(raw));
-    } catch (e) {
-      // Cuota llena o modo privado: se puede seguir sin caché.
+      const raw = await source.load();
+      const { products, meta, issues } = sanitizePriceTable(raw);
+      if (Object.keys(products).length === 0) throw new Error('Tabla de precios vacía tras validar');
+
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(raw));
+      } catch (e) {
+        // Cuota llena o modo privado: se puede seguir sin caché.
+      }
+      if (issues.length) console.warn('[precios] Entradas descartadas:', issues);
+      return createPriceTable(products, meta, source.origin, issues);
+    } catch (err) {
+      console.warn(`[precios] Fuente "${source.origin}" no disponible:`, err.message);
     }
-    if (issues.length) console.warn('[precios] Entradas descartadas:', issues);
-    return createPriceTable(products, meta, 'network', issues);
-  } catch (err) {
-    console.warn('[precios] No se pudo cargar', PRICES_URL, '->', err.message);
   }
 
   try {

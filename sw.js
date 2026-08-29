@@ -11,7 +11,7 @@
  *  - Navegaciones: si la red falla, se sirve el index cacheado.
  */
 
-const CACHE_NAME = 'superprecios-qro-v4';
+const CACHE_NAME = 'superprecios-qro-v5';
 
 // Si algo de aquí falla, falla TODO el precache (cache.addAll es atómico).
 // Solo debe contener rutas que de verdad existan en el repo.
@@ -26,6 +26,7 @@ const APP_SHELL = [
   './js/optimizer.js',
   './js/parser.js',
   './js/prices.js',
+  './js/config.js',
   './js/pwa.js',
   './data/prices.json',
   './assets/icons/icon.svg',

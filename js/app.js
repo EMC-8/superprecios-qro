@@ -66,7 +66,9 @@ function renderPriceSourceBadge() {
   }
 
   badge.classList.toggle('is-warning', table.isStale());
-  const origen = table.origin === 'cache' ? ' · copia local' : '';
+  const origen = table.origin === 'cache' ? ' · copia local'
+    : table.origin === 'supabase' ? ' · en vivo'
+    : '';
   badge.textContent = `🏷️ Precios ${table.freshnessLabel()}${origen}`;
   badge.title = `${table.meta.sourceLabel}. ${table.pricedProductCount} productos con precio. `
     + `Actualizado ${table.freshnessLabel()}${table.meta.region ? ' para ' + table.meta.region : ''}. `
