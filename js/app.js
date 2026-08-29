@@ -2,7 +2,7 @@
  * Aplicación Principal - SuperPrecios QRO (PWA)
  */
 
-import { SUPERMARKETS, CATEGORIES, PRODUCTS_CATALOG, SAMPLE_LISTS } from './data.js';
+import { SUPERMARKETS, CATEGORIES, PRODUCTS_CATALOG, SAMPLE_LISTS, LAST_VERIFICATION_DATE } from './data.js';
 import { parseShoppingListText, parseLine } from './parser.js';
 import { calculateOptimizations } from './optimizer.js';
 import { initPWA, promptInstallApp } from './pwa.js';
@@ -18,8 +18,10 @@ const AppState = {
   activeStoreFilter: 'all'
 };
 
-const STORAGE_KEY = 'superprecios_qro_list_v1';
-const CHECKED_KEY = 'superprecios_qro_checked_v1';
+// v2: las cantidades ahora se guardan siempre en presentaciones de venta (ver parser.js).
+// Subir la versión descarta las listas guardadas con el formato viejo en vez de mostrarlas mal.
+const STORAGE_KEY = 'superprecios_qro_list_v2';
+const CHECKED_KEY = 'superprecios_qro_checked_v2';
 
 // --- INICIALIZACIÓN ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -32,8 +34,23 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   setupEventListeners();
+  renderPriceSourceBadge();
   renderAll();
 });
+
+/**
+ * El badge del header describe de dónde salen los precios.
+ * Son capturas manuales con fecha, no una consulta en vivo a las tiendas:
+ * decirlo es lo que hace comparable (y creíble) el resultado.
+ */
+function renderPriceSourceBadge() {
+  const badge = document.getElementById('price-source-badge');
+  if (!badge) return;
+  badge.textContent = `🏷️ Precios de referencia · ${LAST_VERIFICATION_DATE}`;
+  badge.title = `Precios capturados manualmente de los sitios oficiales el ${LAST_VERIFICATION_DATE}. `
+    + 'No son una consulta en vivo y pueden variar por sucursal y promociones. '
+    + 'Los productos fuera del catálogo usan precios estimados, marcados con ≈.';
+}
 
 // --- PERSISTENCIA LOCALSTORAGE ---
 function loadSavedState() {
@@ -226,11 +243,15 @@ function renderShoppingListEditor() {
 
   listContainer.innerHTML = AppState.shoppingList.map((item, index) => {
     const formattedQty = item.unit === 'kg' ? `${item.quantity} kg` : `${item.quantity} ${item.unit}`;
+    const notes = [];
+    if (item.measureNote) notes.push(`📐 ${item.measureNote}`);
+    if (item.isEstimatedPrice) notes.push('≈ precio estimado (fuera del catálogo verificado)');
     return `
       <div class="list-item-card" data-index="${index}">
         <div class="item-info">
-          <span class="item-name">${item.name}</span>
+          <span class="item-name">${item.name}${item.isEstimatedPrice ? ' <span class="estimated-tag">≈</span>' : ''}</span>
           <span class="item-meta">Categoría: ${getCategoryName(item.category)} • Cantidad: <strong>${formattedQty}</strong></span>
+          ${notes.length ? `<span class="item-note">${notes.join(' • ')}</span>` : ''}
         </div>
         <div class="item-controls">
           <button class="qty-btn btn-minus" data-index="${index}">-</button>

@@ -838,6 +838,27 @@ body {
   color: var(--text-muted);
 }
 
+/* Aviso de conversión de medidas o de precio estimado */
+.item-info .item-note {
+  display: block;
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: #fbbf24;
+  opacity: 0.9;
+}
+
+.estimated-tag {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .item-controls {
   display: flex;
   align-items: center;

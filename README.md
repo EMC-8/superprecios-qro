@@ -17,15 +17,30 @@
    - **⚖️ Ruta Práctica (Máximo 2 Tiendas)**: Algoritmo combinatorio de pares que encuentra la combinación óptima de 2 supermercados para balancear ahorro y tiempo de traslado.
    - **🏪 Todo en 1 Sola Tienda**: Evalúa la canasta completa e identifica cuál es la tienda individual más económica.
 2. **✍️ Parser Inteligente de Texto Libre**:
-   - Permite escribir o pegar listas de compras en lenguaje natural (ej. `2kg pechuga de pollo, 1kg jitomate, 2 leche lala, 1 huevo san juan, 1 aceite nutrioli, 1 pan bimbo, 1 papel de bano`) reconociendo automáticamente cantidades, unidades y marcas.
+   - Permite escribir o pegar listas de compras en lenguaje natural (ej. `2 leche lala, 1 huevo san juan, 500g queso panela, 1 aceite nutrioli, 1 pan bimbo, 1 papel de bano`) reconociendo automáticamente cantidades, unidades y marcas.
+   - Convierte medidas a presentaciones reales de venta: `500g queso panela` → **2 bloques de 400g**; `30 huevos` → **1 cartera de 30**. La conversión se muestra en la lista para que sea auditable.
 3. **🛒 Modo Supermercado (Checklist Interactivo)**:
    - Lista interactiva filtrada por tienda con casillas para ir tachando productos en tiempo real en los pasillos físicos de la tienda.
 4. **📲 PWA Completa & Offline**:
-   - Service Worker con estrategia de caché *Stale-While-Revalidate*. Funciona sin conexión a internet dentro del supermercado.
+   - Service Worker con estrategia *Network First* y respaldo en caché. Funciona sin conexión a internet dentro del supermercado.
    - Instalable como app nativa en Android, iOS y Desktop.
    - Botón para compartir la ruta y desglose por WhatsApp.
 5. **🏷️ Catálogo con Códigos de Barras Oficiales (EAN-13)**:
    - Productos estandarizados con sus códigos GTIN/EAN-13 registrados ante GS1 México y enlaces de verificación.
+
+---
+
+## ⚠️ Sobre los precios (léelo antes de confiar en el total)
+
+Los precios viven en `js/data.js` y son **capturas manuales con fecha** (`LAST_VERIFICATION_DATE`), no una
+consulta en vivo a las tiendas. Pueden variar por sucursal, promoción y temporada.
+
+Los productos que **no** están en el catálogo (ej. frutas, verduras, carne) reciben un **precio estimado**
+generado por `estimatePricesForUnknown()`. Se marcan con `≈` en la interfaz y **no deben tomarse como reales**:
+sirven para que la lista no se rompa, no para decidir dónde comprar.
+
+Antes de publicar la app a usuarios reales, conecta una fuente de precios de verdad (ver *Guía para el
+siguiente desarrollador*).
 
 ---
 
@@ -47,7 +62,9 @@ superprecios-qro/
 │   └── pwa.js              # Inicialización de Service Worker y banner de instalación
 ├── assets/
 │   └── icons/
-│       └── icon.svg        # Ícono SVG PWA
+│       ├── icon.svg        # Ícono maestro (fuente de los PNG)
+│       ├── icon-192.png    # Ícono PWA Android / precache
+│       └── icon-512.png    # Ícono PWA splash / instalación
 └── README.md
 ```
 
