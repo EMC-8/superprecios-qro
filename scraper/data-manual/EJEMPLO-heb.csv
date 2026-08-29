@@ -1,0 +1,15 @@
+# Captura manual de precios — SuperPrecios QRO
+#
+# Este archivo es el ejemplo. Copialo, renombralo (ej. 2026-08-29-heb.csv) y
+# llenalo con precios que hayas visto tu mismo en anaquel o en el sitio oficial.
+#
+# HEB es la unica de las 6 cadenas que NO publica en los datos abiertos de
+# PROFECO, asi que sus precios solo pueden entrar por aqui.
+#
+# Los EAN tienen que existir en js/data.js. El store_id tambien.
+# Si un precio no lo viste, no lo inventes: dejalo fuera. La app sabe decir
+# "sin precio"; lo que no sabe es adivinar que un precio esta mal.
+#
+ean,store_id,price,captured_at,branch,note
+7501020513478,heb,29.90,2026-08-29,HEB Juriquilla,precio de anaquel
+7501166300405,heb,62.00,2026-08-29,HEB Juriquilla,cartera 30 pz

@@ -1,0 +1,85 @@
+{
+  "_comentario": [
+    "Mapeo EXPLÍCITO de filas de PROFECO a EANs de nuestro catálogo.",
+    "",
+    "PROFECO no publica código de barras, así que el empate se hace por texto.",
+    "Cada entrada exige que TODOS los términos de 'requiere' aparezcan en",
+    "'producto marca presentacion' (ya normalizado: sin acentos, minúsculas) y",
+    "que NINGUNO de 'excluye' aparezca.",
+    "",
+    "Regla de oro: sólo se mapea cuando la PRESENTACIÓN coincide con la del",
+    "catálogo. Un atún de 140 g y uno de 74 g no son el mismo precio, y mezclarlos",
+    "produciría una recomendación confiadamente equivocada.",
+    "",
+    "Verificado contra el archivo 11-2025_01.csv (2,323 filas de supermercados",
+    "en Santiago de Querétaro).",
+    "",
+    "Para agregar más: corre `npm run scrape:sugerencias` y revisa los candidatos."
+  ],
+
+  "entradas": [
+    {
+      "ean": "7501020513478",
+      "producto": "Leche Lala Entera 1 Litro",
+      "requiere": ["leche", "lala", "1 lt", "entera"],
+      "excluye": ["descremada", "light", "deslactosada"]
+    },
+    {
+      "ean": "7501166300405",
+      "producto": "Huevo Blanco San Juan (Cartera 30 piezas)",
+      "requiere": ["huevo", "san juan", "c/30"],
+      "excluye": ["rojo"]
+    },
+    {
+      "ean": "7501039100063",
+      "producto": "Aceite Vegetal Nutrioli 850ml",
+      "requiere": ["aceite", "nutrioli", "850 ml"],
+      "excluye": []
+    },
+    {
+      "ean": "7501078100119",
+      "producto": "Arroz Súper Extra Verde Valle 900g",
+      "requiere": ["arroz", "verde valle", "900 gr", "super extra"],
+      "excluye": []
+    },
+    {
+      "ean": "7501078100232",
+      "producto": "Frijol Negro Verde Valle 900g",
+      "requiere": ["frijol", "verde valle", "900 gr", "negro"],
+      "excluye": ["jamapa", "peruano", "pinto", "bayo"]
+    },
+    {
+      "ean": "7501000111204",
+      "producto": "Pan Blanco Bimbo Grande 620g",
+      "requiere": ["pan de caja", "bimbo", "620 gr", "blanco"],
+      "excluye": ["integral", "tostado"]
+    },
+    {
+      "ean": "7501943440129",
+      "producto": "Papel Higiénico Pétalo Rendimax 12 rollos",
+      "requiere": ["papel higienico", "petalo", "rendimax", "12 rollos"],
+      "excluye": []
+    },
+    {
+      "ean": "7501045401340",
+      "producto": "Atún Dolores en Agua Aleta Amarilla 140g",
+      "requiere": ["atun", "dolores", "lata 140 gr", "en agua"],
+      "excluye": ["con aceite", "ensalada", "sardina"]
+    }
+  ],
+
+  "_sin_mapear": {
+    "_nota": "Presentes en el catálogo pero NO empatables hoy. Se dejan documentados para que nadie los mapee mal por descuido.",
+    "7501075600025": "Pasta Barilla 500g — PROFECO sólo muestrea paquete de 200 g",
+    "7501064191343": "Corona 6-pack latas 355ml — PROFECO sólo muestrea botella familiar 940 ml retornable",
+    "7501040001019": "Queso Panela FUD 400g — no aparece en la muestra de Querétaro",
+    "7501020521015": "Crema Ácida Lala 450ml — no aparece",
+    "7501005101019": "Mayonesa McCormick 390g — no aparece",
+    "7501058617873": "Café Nescafé Clásico 120g — no aparece",
+    "7500435128031": "Detergente Ariel 1kg — no aparece",
+    "7501025400032": "Cloro Cloralex 950ml — no aparece",
+    "7509546071856": "Lavatrastes Axión 750ml — no aparece",
+    "7501055304745": "Coca-Cola 2.5L — no aparece",
+    "7501003601559": "Agua Bonafont 6L — no aparece"
+  }
+}

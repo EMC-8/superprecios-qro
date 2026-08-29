@@ -1,0 +1,57 @@
+name: Actualizar precios
+
+# Corre el scraper, guarda el histórico en Supabase y commitea data/prices.json.
+# Al commitear, Vercel redespliega solo y la PWA queda con los precios nuevos.
+on:
+  schedule:
+    # Lunes y jueves a las 9:00 UTC (3:00 AM en Querétaro).
+    # PROFECO publica quincenalmente, así que dos veces por semana es de sobra.
+    - cron: '0 9 * * 1,4'
+  workflow_dispatch:
+    inputs:
+      solo:
+        description: 'Correr un único adaptador (profeco | manual)'
+        required: false
+        type: string
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Correr el scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -n "${{ inputs.solo }}" ]; then
+            node scraper/run.mjs --only "${{ inputs.solo }}"
+          else
+            node scraper/run.mjs
+          fi
+
+      - name: Validar el resultado antes de publicarlo
+        run: npm run validate:prices
+
+      - name: Correr las pruebas
+        run: npm test
+
+      - name: Commitear los precios nuevos
+        run: |
+          if git diff --quiet data/prices.json; then
+            echo "Sin cambios en los precios; no hay nada que commitear."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/prices.json
+          git commit -m "chore: actualiza precios ($(date -u +%Y-%m-%d))"
+          git push

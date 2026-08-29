@@ -8,7 +8,12 @@
 - **HEB Querétaro**
 - **La Comer / Fresko**
 
-> **Estado:** la aplicación funciona completa de punta a punta con la tabla de precios versionada en el repo. **Lo único que falta para producción es el scraping** que mantenga esos precios al día. Ver [Cómo conectar el scraping](#-cómo-conectar-el-scraping).
+> **Estado:** la app funciona completa de punta a punta, hay esquema de base de datos, pipeline de ingesta de precios y despliegue configurado.
+>
+> - 🚀 **Desplegar:** [`docs/despliegue.md`](docs/despliegue.md)
+> - 🔌 **Precios y scraping:** [`docs/scraping.md`](docs/scraping.md)
+>
+> Advertencia honesta sobre los datos: las cadenas **bloquean el scraping directo**, así que la fuente automatizada es el programa de datos abiertos de PROFECO, que publica con meses de retraso. Los precios sirven como referencia, no como precio de caja. La app lo dice sola.
 
 ---
 
@@ -60,8 +65,17 @@ superprecios-qro/
 │   ├── optimizer.js            # Motor de cálculo y optimización
 │   ├── parser.js               # Parser de lenguaje natural
 │   └── pwa.js                  # Service Worker y banner de instalación
+├── supabase/
+│   ├── migrations/             # Esquema Postgres (histórico de precios + RLS)
+│   └── seed.sql                # Generado desde js/data.js
+├── scraper/
+│   ├── run.mjs                 # Orquestador del pipeline de precios
+│   ├── adapters/               # profeco (automático) + csv-manual
+│   ├── lib/                    # HTTP con modales, validación, escritura
+│   └── mappings/               # Empate explícito PROFECO -> EAN
 ├── scripts/
-│   └── validate-prices.mjs     # Valida data/prices.json contra el contrato
+│   ├── validate-prices.mjs     # Valida data/prices.json contra el contrato
+│   └── generate-seed.mjs       # Regenera supabase/seed.sql desde el catálogo
 ├── test/
 │   ├── optimizer.test.mjs
 │   └── parser.test.mjs
@@ -98,11 +112,19 @@ npm test
 npm run validate:prices
 ```
 
+### Actualizar precios
+
+```bash
+npm run scrape:dry
+```
+
+Corre el pipeline completo sin escribir nada. Quita `:dry` para que escriba de verdad. Detalle en [`docs/scraping.md`](docs/scraping.md).
+
 ---
 
-## 🔌 Cómo conectar el scraping
+## 🔌 De dónde salen los precios
 
-Esta es **la única pieza que falta**. La app entera consume un solo archivo, así que un scraper no necesita tocar JavaScript: le basta con escribir `data/prices.json` con este esquema.
+La app entera consume un solo documento, y da igual si viene de la base de datos o de un archivo: el esquema es idéntico. Un scraper no necesita tocar JavaScript.
 
 ```json
 {
