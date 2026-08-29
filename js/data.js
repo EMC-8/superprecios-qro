@@ -143,7 +143,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pqte',
     aliases: ['huevo', 'huevos', 'huevo san juan', 'cartera de huevo', 'huevo blanco', '30 huevos', '7501166300405'],
     officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501166300405',
-    prices: { aurrera: 64.00, chedraui: 65.00, soriana: 64.90, heb: 62.00, walmart: 66.00, lacomer: 72.00 }
+    prices: { aurrera: 64.00, chedraui: 65.00, soriana: 63.00, heb: 62.00, walmart: 66.00, lacomer: 72.00 }
   },
   {
     id: 'queso-panela-fud-400g',
@@ -153,7 +153,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     aliases: ['queso panela', 'panela', 'queso panela fud', 'panela fud', '7501040001019'],
     officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501040001019',
-    prices: { aurrera: 64.00, chedraui: 63.50, soriana: 67.00, walmart: 68.00, heb: 69.50, lacomer: 74.00 }
+    prices: { aurrera: 64.00, chedraui: 63.50, soriana: 77.00, walmart: 68.00, heb: 69.50, lacomer: 74.00 }
   },
   {
     id: 'crema-lala-acida-450ml',
@@ -163,7 +163,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     aliases: ['crema', 'crema lala', 'crema acida', '7501020521015'],
     officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501020521015',
-    prices: { aurrera: 29.00, chedraui: 29.50, walmart: 31.50, soriana: 31.00, heb: 31.00, lacomer: 34.00 }
+    prices: { aurrera: 29.00, chedraui: 29.50, walmart: 31.50, soriana: 43.90, heb: 31.00, lacomer: 34.00 }
   },
 
   // 2. DESPENSA Y ABARROTES (EAN-13 Verificados)
@@ -215,7 +215,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     aliases: ['mayonesa', 'mayonesa mccormick', 'mccormick', '7501005101019'],
     officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501005101019',
-    prices: { aurrera: 45.00, chedraui: 44.50, soriana: 48.00, heb: 47.50, walmart: 49.00, lacomer: 53.00 }
+    prices: { aurrera: 45.00, chedraui: 44.50, soriana: 80.90, heb: 47.50, walmart: 49.00, lacomer: 53.00 }
   },
   {
     id: 'cafe-nescafe-clasico-120g',
@@ -279,7 +279,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     aliases: ['cloro', 'cloralex', 'cloro liquido', 'blanqueador', '7501025400032'],
     officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501025400032',
-    prices: { aurrera: 16.50, chedraui: 16.90, soriana: 18.00, heb: 18.50, walmart: 19.00, lacomer: 21.00 }
+    prices: { aurrera: 16.50, chedraui: 16.90, soriana: 20.90, heb: 18.50, walmart: 19.00, lacomer: 21.00 }
   },
   {
     id: 'lavatrastes-axion-limon-750ml',
@@ -289,7 +289,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     aliases: ['axion', 'jabon para trastes', 'lavatrastes', 'axion limon', '7509546071856'],
     officialRegistryUrl: 'https://world.openfoodfacts.org/product/7509546071856',
-    prices: { chedraui: 35.50, aurrera: 36.00, soriana: 38.90, heb: 39.00, walmart: 40.00, lacomer: 43.50 }
+    prices: { chedraui: 35.50, aurrera: 36.00, soriana: 49.50, heb: 39.00, walmart: 40.00, lacomer: 43.50 }
   },
 
   // 5. BEBIDAS Y LÍQUIDOS (EAN-13 Verificados)
@@ -301,7 +301,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     aliases: ['coca cola', 'coca', 'refresco', 'coca 2.5l', '7501055304745'],
     officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501055304745',
-    prices: { aurrera: 36.00, chedraui: 37.00, soriana: 38.00, heb: 38.00, walmart: 38.50, lacomer: 41.00 }
+    prices: { aurrera: 36.00, chedraui: 37.00, soriana: 99.00, heb: 38.00, walmart: 38.50, lacomer: 41.00 }
   },
   {
     id: 'cerveza-corona-extra-6pack-latas',
