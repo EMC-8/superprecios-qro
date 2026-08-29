@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "cadena": "chedraui",
+  "descripcion": "Mapeo verificado de productos del catálogo de SuperPrecios QRO contra URLs de productos en chedraui.com.mx con marcado Schema.org JSON-LD.",
+  "actualizado": "2026-08-29",
+  "entradas": [
+    {
+      "ean": "7501020513478",
+      "producto": "Leche Lala Entera 1 Litro",
+      "url": "https://www.chedraui.com.mx/leche-entera-lala-fresca-plastico-1l-3012021/p"
+    },
+    {
+      "ean": "7501166300405",
+      "producto": "Huevo Blanco San Juan (Cartera 30 piezas)",
+      "url": "https://www.chedraui.com.mx/huevo-san-juan-blanco-30-piezas-3101215/p"
+    },
+    {
+      "ean": "7501040001019",
+      "producto": "Queso Panela FUD en Bloque 400g",
+      "url": "https://www.chedraui.com.mx/queso-fud-panela-400g-3015788/p"
+    },
+    {
+      "ean": "7501020521015",
+      "producto": "Crema Ácida Lala 450ml",
+      "url": "https://www.chedraui.com.mx/crema-lala-entera-426ml-3646609/p"
+    },
+    {
+      "ean": "7501039100063",
+      "producto": "Aceite Vegetal Nutrioli Puro de Soya 850ml",
+      "url": "https://www.chedraui.com.mx/aceite-vegetal-nutrioli-puro-de-soya-850ml-3132396/p"
+    },
+    {
+      "ean": "7501078100119",
+      "producto": "Arroz Súper Extra Verde Valle 900g",
+      "url": "https://www.chedraui.com.mx/arroz-super-extra-verde-valle-750g-3249260/p"
+    },
+    {
+      "ean": "7501078100232",
+      "producto": "Frijol Negro Verde Valle 900g",
+      "url": "https://www.chedraui.com.mx/frijol-verde-valle-negro-queretaro-900g-3008238/p"
+    },
+    {
+      "ean": "7501045401340",
+      "producto": "Atún Dolores en Agua Aleta Amarilla 140g",
+      "url": "https://www.chedraui.com.mx/lomo-solido-de-atun-dolores-en-agua-140g-3152860/p"
+    },
+    {
+      "ean": "7501005101019",
+      "producto": "Mayonesa McCormick con Limón 390g",
+      "url": "https://www.chedraui.com.mx/mayonesa-mccormick-con-limon-507g-3629454/p"
+    },
+    {
+      "ean": "7501058617873",
+      "producto": "Café Soluble Nescafé Clásico 120g",
+      "url": "https://www.chedraui.com.mx/cafe-soluble-nescafe-clasico-120g-3397668/p"
+    },
+    {
+      "ean": "7501075600025",
+      "producto": "Pasta Espagueti Barilla 500g",
+      "url": "https://www.chedraui.com.mx/spaghetti-barilla-no7-450g-3784154/p"
+    },
+    {
+      "ean": "7501000111204",
+      "producto": "Pan Blanco Bimbo Grande 620g",
+      "url": "https://www.chedraui.com.mx/pan-bimbo-blanco-620g-3817240/p"
+    },
+    {
+      "ean": "7501943440129",
+      "producto": "Papel Higiénico Pétalo Rendimax 12 rollos",
+      "url": "https://www.chedraui.com.mx/papel-higienico-petalo-maxi-resist-18-rollos-3692770/p"
+    },
+    {
+      "ean": "7500435128031",
+      "producto": "Detergente en Polvo Ariel Doble Poder 1kg",
+      "url": "https://www.chedraui.com.mx/detergente-en-polvo-ariel-poder-y-cuidado-8-lavadas-1kg-3102162/p"
+    },
+    {
+      "ean": "7501025400032",
+      "producto": "Cloro Cloralex El Rendidor 950ml",
+      "url": "https://www.chedraui.com.mx/blanqueador-liquido-cloralex-el-rendidor-950ml-3002315/p"
+    },
+    {
+      "ean": "7509546071856",
+      "producto": "Lavatrastes Líquido Axión Limón 750ml",
+      "url": "https://www.chedraui.com.mx/lavatrastes-liquido-axion-limon-100-efectivo-arrancagrasa-750ml-3169897/p"
+    },
+    {
+      "ean": "7501055304745",
+      "producto": "Refresco Coca-Cola Original 2.5 Litros",
+      "url": "https://www.chedraui.com.mx/refresco-coca-cola-original-135l-3663138/p"
+    },
+    {
+      "ean": "7501064191343",
+      "producto": "Cerveza Corona Extra 6-Pack Latas 355ml",
+      "url": "https://www.chedraui.com.mx/cerveza-corona-extra-6-latas-de-355ml-cu-3115576/p"
+    },
+    {
+      "ean": "7501003601559",
+      "producto": "Agua Purificada Bonafont Garrafón 6 Litros",
+      "url": "https://www.chedraui.com.mx/agua-natural-bonafont-6l-3163754/p"
+    }
+  ]
+}
