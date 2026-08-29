@@ -1,77 +1,119 @@
-# Despliegue
+# Runbook de despliegue
 
-La app es un sitio estático sin paso de build. Eso hace el despliegue trivial y
-el rollback también. La base de datos es opcional: sin ella la app funciona
-leyendo `data/prices.json`.
+Guía operativa para conectar Supabase y Vercel. Escrita para que alguien que no
+estuvo en el desarrollo pueda ejecutarla de principio a fin.
 
----
-
-## 1. Subir el repositorio
-
-Ya existe el repo privado `JETER3/superprecios-qro` y el remoto local apunta ahí.
-Falta empujar la rama:
-
-```bash
-git push -u origin main
-```
-
-> El remoto `upstream` sigue apuntando a `EMC-8/superprecios-qro`, el repositorio
-> original. Si algún día tienes permiso de escritura ahí, puedes empujar con
-> `git push upstream main`.
+**Las partes A, B y C son independientes.** La app funciona sin Supabase (lee
+`data/prices.json`), así que puedes desplegar en Vercel hoy y conectar la base
+después. No hay orden obligatorio salvo dentro de cada parte.
 
 ---
 
-## 2. Vercel
+## Antes de empezar
 
-### Opción A — enlazar el repositorio (recomendada)
+| Requisito | Estado |
+|---|---|
+| Repo | `JETER3/superprecios-qro` — **privado** |
+| Rama de producción | `main` |
+| Build | **ninguno**. Es un sitio estático de módulos ES. |
+| Node para scripts locales | 22+ |
 
-Es la que quieres para "ir probando mientras mejoramos": cada `git push`
-despliega solo.
-
-1. Entra a [vercel.com/new](https://vercel.com/new).
-2. Importa `JETER3/superprecios-qro`.
-3. **No configures build**: Framework Preset `Other`, Build Command vacío,
-   Output Directory vacío. El repo ya trae `vercel.json` con las cabeceras
-   correctas.
-4. Deploy.
-
-Cada push a `main` genera producción; cada rama genera su propia URL de preview.
-
-### Opción B — desde la terminal
+Clona y verifica que todo pasa antes de tocar infraestructura:
 
 ```bash
-npx vercel --prod
+npm test
 ```
 
-### Qué hace `vercel.json`
+Deben salir **41 pruebas en verde**. Si algo falla, para y avisa: no despliegues
+sobre una base rota.
+
+---
+
+## Parte A — Vercel
+
+### A.1 Dar acceso al repositorio
+
+El repo es privado, así que la GitHub App de Vercel no lo ve todavía. **Este es
+el primer bloqueo y hay que resolverlo antes que nada.** Dos caminos:
+
+- **Mantenerlo privado (recomendado):** GitHub → *Settings* → *Applications* →
+  *Vercel* → *Configure* → en *Repository access*, agregar `superprecios-qro`.
+- **Hacerlo público:** `gh repo edit JETER3/superprecios-qro --visibility public --accept-visibility-change-consequences`
+  (ojo: hacer público no se deshace del todo; lo que se clone o indexe mientras
+  tanto ya salió).
+
+### A.2 Importar el proyecto
+
+1. [vercel.com/new](https://vercel.com/new) → importar `JETER3/superprecios-qro`.
+2. **Framework Preset:** `Other`
+3. **Build Command:** vacío
+4. **Output Directory:** vacío
+5. **Install Command:** vacío
+6. Deploy.
+
+> No pongas build. Si Vercel intenta construir algo, la configuración quedó mal:
+> este proyecto sirve los archivos tal cual.
+
+El repo ya trae `vercel.json` con las cabeceras necesarias:
 
 | Ruta | Cabecera | Por qué |
 |---|---|---|
-| `/sw.js` | `no-cache` | Un Service Worker cacheado es un Service Worker que nunca se actualiza |
-| `/data/prices.json` | `max-age=0, must-revalidate` | Los precios tienen que poder cambiar sin esperar a que expire un caché |
+| `/sw.js` | `no-cache` | Un Service Worker cacheado nunca se actualiza |
+| `/data/prices.json` | `max-age=0, must-revalidate` | Los precios deben poder cambiar sin esperar un caché |
 | `/assets/*` | `max-age=604800` | Íconos que casi nunca cambian |
+
+### A.3 Verificar
+
+Abre la URL de producción y confirma:
+
+- [ ] Cargan las 5 pestañas: Ahorro & Ruta, Mi Lista, Modo Súper, Compra Guiada, Catálogo.
+- [ ] El badge del header dice **"Precios ..."** con una fecha, no "Sin precios cargados".
+- [ ] En *Ahorro & Ruta* aparece un total y las tarjetas por tienda.
+- [ ] DevTools → *Application* → *Service Workers*: aparece `superprecios-qro-v6`
+      **activated and running**.
+- [ ] DevTools → *Application* → *Cache Storage*: el caché `superprecios-qro-v6`
+      tiene 18 entradas, incluida `data/prices.json`.
+
+> El punto del Service Worker no se pudo verificar durante el desarrollo (el
+> navegador usado bloqueaba el registro). **Es la verificación más importante de
+> esta lista**: si falla, la app no sirve sin señal, que es justo el escenario
+> dentro del súper. Si no se registra, revisa la consola y que `/sw.js` se sirva
+> con `Content-Type: application/javascript`.
+
+A partir de aquí, cada push a `main` despliega producción y cada rama genera su
+propia URL de preview.
 
 ---
 
-## 3. Supabase (opcional pero recomendado)
+## Parte B — Supabase
 
-Sin esto la app funciona; con esto obtienes histórico de precios y
+Sin esto la app funciona. Con esto obtienes histórico de precios y
 actualizaciones sin necesidad de commitear.
 
-### 3.1 Crear el proyecto
+### B.1 Conseguir un proyecto — bloqueo conocido
 
-> **Bloqueo actual:** tu organización *ETER* ya tiene 2 proyectos gratuitos
-> activos (`ETERID` y `torrent-studio-crm`), que es el límite del plan. Para
-> crear uno nuevo tienes que pausar o borrar alguno de esos, o subir de plan.
-> Alternativa sin tocar nada: usar un proyecto existente, ya que todas las
-> tablas viven en el esquema `public` con nombres propios del dominio
-> (`products`, `stores`, `price_observations`…).
+La organización **ETER** ya tiene sus 2 proyectos gratuitos activos:
+`ETERID` y `torrent-studio-crm`. Supabase no deja crear un tercero.
 
-Una vez con proyecto disponible, en **SQL Editor** corre en orden:
+Tres salidas:
 
-1. `supabase/migrations/0001_initial_schema.sql`
-2. `supabase/migrations/0002_rls_and_snapshot.sql`
-3. `supabase/seed.sql`
+1. **Pausar o borrar uno de esos dos.** Decisión del dueño; nadie más debería
+   tomarla.
+2. **Subir de plan** la organización.
+3. **Usar un proyecto existente.** Es viable: todas las tablas van al esquema
+   `public` con nombres propios del dominio (`stores`, `branches`, `categories`,
+   `products`, `price_observations`, `scrape_runs`) y no tocan nada previo.
+   Revisa antes que esos nombres estén libres en el proyecto que elijas.
+
+### B.2 Aplicar el esquema
+
+En **SQL Editor**, correr **en este orden**:
+
+| # | Archivo | Qué hace |
+|---|---|---|
+| 1 | `supabase/migrations/0001_initial_schema.sql` | Tablas, índices y la vista `current_prices` |
+| 2 | `supabase/migrations/0002_rls_and_snapshot.sql` | RLS de sólo lectura + `prices_snapshot()` + `price_history()` |
+| 3 | `supabase/seed.sql` | 6 cadenas, 19 sucursales, 5 categorías, 19 productos, 114 precios |
 
 O con la CLI:
 
@@ -83,10 +125,37 @@ supabase link --project-ref TU_PROJECT_REF
 supabase db push
 ```
 
-### 3.2 Conectar la app
+> `supabase/seed.sql` está **generado** desde `js/data.js`. No lo edites a mano:
+> si cambias el catálogo, corre `npm run seed` y vuelve a aplicarlo.
 
-En **Project Settings → API** copia la URL y la *publishable key*, y ponlas en
-[`js/config.js`](../js/config.js):
+### B.3 Verificar el esquema
+
+```sql
+select public.prices_snapshot();
+```
+
+Debe devolver un JSON con `generatedAt`, `currency`, `region` y `products` con
+19 llaves EAN. Si `products` sale vacío, el seed no se aplicó.
+
+Comprobar que RLS quedó bien puesto — esto **debe fallar**:
+
+```sql
+set role anon;
+insert into public.price_observations (ean, store_id, price, source)
+values ('7501020513478', 'aurrera', 1.00, 'prueba');
+```
+
+Si ese insert **funciona**, RLS no está activo y cualquiera podría escribir
+precios. Para y revisa la migración 0002 antes de seguir.
+
+```sql
+reset role;
+```
+
+### B.4 Conectar la app
+
+En **Project Settings → API**, copia la URL y la *publishable key* (la pública,
+**no** la `service_role`), y ponlas en `js/config.js`:
 
 ```js
 export const SUPABASE = {
@@ -95,27 +164,30 @@ export const SUPABASE = {
 };
 ```
 
-Commitear esa llave es correcto: es pública por diseño, sólo permite leer, y lo
-que protege los datos es RLS. **La `service_role` key nunca va aquí** — esa sólo
-vive en los secretos de CI.
+Commitear esa llave es correcto y esperado: es pública por diseño, sólo permite
+leer, y lo que protege los datos es RLS.
 
-Al recargar, el badge del header debe decir **"Precios hoy · en vivo"**.
+**La `service_role` key nunca va en `js/config.js` ni en ningún archivo del
+repo.** Sólo vive en los secretos de CI (Parte C). Si alguna vez aparece en un
+commit, hay que rotarla en Supabase, no sólo borrarla del archivo.
 
-### 3.3 Verificar
+### B.5 Verificar la conexión
 
-```sql
-select public.prices_snapshot();
-```
+Haz push, espera el deploy y abre la app. El badge del header debe decir:
 
-Debe devolver un JSON con la misma forma que `data/prices.json`.
+> 🏷️ Precios hoy **· en vivo**
+
+Ese "· en vivo" es la señal de que está leyendo de Supabase. Si dice sólo
+"Precios ..." sin el sufijo, está cayendo al archivo: revisa la consola, suele
+ser CORS o la llave mal copiada.
 
 ---
 
-## 4. Actualización automática de precios
+## Parte C — Actualización automática de precios
 
-El workflow [`.github/workflows/actualizar-precios.yml`](../.github/workflows/actualizar-precios.yml)
-corre el scraper lunes y jueves, valida el resultado, corre las pruebas y
-commitea `data/prices.json`. Ese commit dispara el redespliegue en Vercel.
+El workflow `.github/workflows/actualizar-precios.yml` ya existe. Corre lunes y
+jueves: ejecuta el scraper, valida el resultado, corre las pruebas y commitea
+`data/prices.json`. Ese commit dispara el redespliegue en Vercel.
 
 En **GitHub → Settings → Secrets and variables → Actions**, agrega:
 
@@ -127,15 +199,38 @@ En **GitHub → Settings → Secrets and variables → Actions**, agrega:
 Sin esos secretos el workflow igual funciona: escribe `data/prices.json` y omite
 la base de datos.
 
-Para dispararlo a mano: pestaña **Actions → Actualizar precios → Run workflow**.
+### Probarlo sin esperar al cron
+
+**Actions → Actualizar precios → Run workflow.**
+
+O localmente, sin escribir nada:
+
+```bash
+npm run scrape:dry
+```
+
+Descarga ~150 MB del CSV de PROFECO, así que tarda. Salida esperada: encuentra
+la quincena publicada más reciente, lee ~437,000 filas, y reporta cobertura por
+tienda.
 
 ---
 
-## 5. Orden recomendado
+## Lo que conviene no romper
 
-1. `git push` → repo en GitHub.
-2. Importar en Vercel → **ya tienes URL para probar**. Esto no depende de nada más.
-3. Cuando liberes un espacio de Supabase: migraciones + seed + `js/config.js`.
-4. Cuando la base esté lista: secretos de CI y activar el workflow.
+Antes de cambiar algo del comportamiento, lee
+[`CONTINUIDAD.md`](../CONTINUIDAD.md) sección 2. En corto:
 
-Los pasos 3 y 4 no bloquean al 2. Puedes estar probando la app hoy mismo.
+- **Un precio ausente no vale cero.** Está cubierto por pruebas.
+- **La `service_role` key no entra al repo ni al cliente.**
+- **`supabase/seed.sql` es generado**, no se edita a mano.
+- **Todo nombre que se pinte debe pasar por `escaparHtml()`**: la canasta
+  compartible acepta contenido de terceros por URL.
+
+---
+
+## Orden sugerido
+
+1. **A** — acceso de Vercel al repo e importar. Ya hay URL para probar. *(no depende de nada)*
+2. **B.1** — decidir qué hacer con el límite de proyectos de Supabase. *(decisión del dueño)*
+3. **B.2–B.5** — esquema, seed, llaves, verificación.
+4. **C** — secretos de CI y disparar el workflow una vez a mano.

@@ -30,7 +30,7 @@ te dice dónde comprar cada cosa.
 | Avisos de calidad de datos | ✅ precios viejos, sin precio, copia local |
 | Esquema de base de datos | ✅ escrito y listo, **no aplicado todavía** |
 | Pipeline de ingesta de precios | ✅ corre de verdad contra datos oficiales |
-| Despliegue | ⚠️ configurado, **falta hacer el push y enlazar Vercel** |
+| Despliegue | ⚠️ configurado y subido; **falta enlazar Vercel y Supabase** — ver [`docs/despliegue.md`](docs/despliegue.md) |
 
 ### No funciona / falta
 
@@ -227,22 +227,28 @@ npm run seed               # regenera supabase/seed.sql
 
 ### 4.1 Desbloqueos inmediatos (requieren a una persona, no código)
 
-1. **Push y despliegue.** El repo local apunta a
-   `JETER3/superprecios-qro` (privado, ya creado). Falta:
-   ```bash
-   git push -u origin main
-   ```
-   Luego importar el repo en [vercel.com/new](https://vercel.com/new) con
-   Framework Preset `Other` y **sin build command**. Detalle en
-   [`docs/despliegue.md`](docs/despliegue.md).
+**Todo el código está subido a `JETER3/superprecios-qro`.** Lo que falta es
+infraestructura, y el procedimiento completo está en
+[`docs/despliegue.md`](docs/despliegue.md) escrito como runbook paso a paso.
 
-2. **Base de datos.** La organización de Supabase está en su límite de 2
-   proyectos gratuitos. Hay que pausar uno, subir de plan, o aplicar el esquema
-   en un proyecto existente (las tablas tienen nombres propios del dominio y no
-   chocan). Después: correr las 2 migraciones + el seed, y llenar
-   `js/config.js`.
+En resumen, tres bloqueos, en orden de urgencia:
 
-   La app funciona sin esto. No es bloqueante para probar.
+1. **Acceso al repo.** Es privado y sólo `JETER3` es colaborador. Quien vaya a
+   conectar Vercel necesita ser invitado, y la GitHub App de Vercel necesita
+   permiso sobre este repositorio (ese fue el error `repo_not_found` al intentar
+   enlazarlo). Runbook parte A.1.
+
+2. **Espacio en Supabase.** La organización ETER está en su límite de 2 proyectos
+   gratuitos (`ETERID`, `torrent-studio-crm`). Hay que pausar uno, subir de plan,
+   o aplicar el esquema en un proyecto existente — las tablas tienen nombres
+   propios del dominio y no chocan. Runbook parte B.1.
+
+3. **Verificar el Service Worker en un navegador real.** Nunca se pudo confirmar
+   durante el desarrollo. Es lo que hace que la app sirva sin señal dentro del
+   súper, así que es la verificación que más importa. Runbook parte A.3.
+
+La app funciona sin Supabase (lee `data/prices.json`), así que el punto 2 no
+bloquea al 1.
 
 ### 4.2 Trabajo de producto, por impacto
 

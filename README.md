@@ -11,7 +11,7 @@
 > **Estado:** la app funciona completa de punta a punta, hay esquema de base de datos, pipeline de ingesta de precios y despliegue configurado.
 >
 > - 🤝 **¿Vas a retomar el proyecto?** Empieza por [`CONTINUIDAD.md`](CONTINUIDAD.md)
-> - 🚀 **Desplegar:** [`docs/despliegue.md`](docs/despliegue.md)
+> - 🚀 **Conectar Vercel y Supabase:** [`docs/despliegue.md`](docs/despliegue.md) — runbook paso a paso
 > - 🔌 **Precios y scraping:** [`docs/scraping.md`](docs/scraping.md)
 >
 > Advertencia honesta sobre los datos: las cadenas **bloquean el scraping directo**, así que la fuente automatizada es el programa de datos abiertos de PROFECO, que publica con meses de retraso. Los precios sirven como referencia, no como precio de caja. La app lo dice sola.
