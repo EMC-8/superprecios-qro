@@ -13,7 +13,7 @@ después. No hay orden obligatorio salvo dentro de cada parte.
 
 | Requisito | Estado |
 |---|---|
-| Repo | `JETER3/superprecios-qro` — **privado** |
+| Repo | `EMC-8/superprecios-qro` — **público** |
 | Rama de producción | `main` |
 | Build | **ninguno**. Es un sitio estático de módulos ES. |
 | Node para scripts locales | 22+ |
@@ -31,20 +31,12 @@ sobre una base rota.
 
 ## Parte A — Vercel
 
-### A.1 Dar acceso al repositorio
+### A.1 Importar el proyecto
 
-El repo es privado, así que la GitHub App de Vercel no lo ve todavía. **Este es
-el primer bloqueo y hay que resolverlo antes que nada.** Dos caminos:
+El repositorio es público, así que la GitHub App de Vercel lo ve sin
+configuración extra.
 
-- **Mantenerlo privado (recomendado):** GitHub → *Settings* → *Applications* →
-  *Vercel* → *Configure* → en *Repository access*, agregar `superprecios-qro`.
-- **Hacerlo público:** `gh repo edit JETER3/superprecios-qro --visibility public --accept-visibility-change-consequences`
-  (ojo: hacer público no se deshace del todo; lo que se clone o indexe mientras
-  tanto ya salió).
-
-### A.2 Importar el proyecto
-
-1. [vercel.com/new](https://vercel.com/new) → importar `JETER3/superprecios-qro`.
+1. [vercel.com/new](https://vercel.com/new) → importar `EMC-8/superprecios-qro`.
 2. **Framework Preset:** `Other`
 3. **Build Command:** vacío
 4. **Output Directory:** vacío
@@ -62,7 +54,7 @@ El repo ya trae `vercel.json` con las cabeceras necesarias:
 | `/data/prices.json` | `max-age=0, must-revalidate` | Los precios deben poder cambiar sin esperar un caché |
 | `/assets/*` | `max-age=604800` | Íconos que casi nunca cambian |
 
-### A.3 Verificar
+### A.2 Verificar
 
 Abre la URL de producción y confirma:
 

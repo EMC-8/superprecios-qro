@@ -14,7 +14,7 @@
  */
 
 const DEFAULT_UA =
-  'SuperPreciosQRO/1.0 (comparador de precios sin fines de lucro; +https://github.com/JETER3/superprecios-qro)';
+  'SuperPreciosQRO/1.0 (comparador de precios sin fines de lucro; +https://github.com/EMC-8/superprecios-qro)';
 
 const ultimaPeticionPorHost = new Map();
 

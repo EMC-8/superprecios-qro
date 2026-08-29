@@ -227,28 +227,23 @@ npm run seed               # regenera supabase/seed.sql
 
 ### 4.1 Desbloqueos inmediatos (requieren a una persona, no código)
 
-**Todo el código está subido a `JETER3/superprecios-qro`.** Lo que falta es
-infraestructura, y el procedimiento completo está en
-[`docs/despliegue.md`](docs/despliegue.md) escrito como runbook paso a paso.
+El repositorio de trabajo es **`EMC-8/superprecios-qro`**, público. El
+procedimiento de infraestructura está en [`docs/despliegue.md`](docs/despliegue.md),
+escrito como runbook paso a paso.
 
-En resumen, tres bloqueos, en orden de urgencia:
+Dos bloqueos, en orden de urgencia:
 
-1. **Acceso al repo.** Es privado y sólo `JETER3` es colaborador. Quien vaya a
-   conectar Vercel necesita ser invitado, y la GitHub App de Vercel necesita
-   permiso sobre este repositorio (ese fue el error `repo_not_found` al intentar
-   enlazarlo). Runbook parte A.1.
-
-2. **Espacio en Supabase.** La organización ETER está en su límite de 2 proyectos
+1. **Espacio en Supabase.** La organización ETER está en su límite de 2 proyectos
    gratuitos (`ETERID`, `torrent-studio-crm`). Hay que pausar uno, subir de plan,
    o aplicar el esquema en un proyecto existente — las tablas tienen nombres
    propios del dominio y no chocan. Runbook parte B.1.
 
-3. **Verificar el Service Worker en un navegador real.** Nunca se pudo confirmar
+2. **Verificar el Service Worker en un navegador real.** Nunca se pudo confirmar
    durante el desarrollo. Es lo que hace que la app sirva sin señal dentro del
-   súper, así que es la verificación que más importa. Runbook parte A.3.
+   súper, así que es la verificación que más importa. Runbook parte A.2.
 
-La app funciona sin Supabase (lee `data/prices.json`), así que el punto 2 no
-bloquea al 1.
+La app funciona sin Supabase (lee `data/prices.json`), así que el punto 1 no
+bloquea desplegar en Vercel.
 
 ### 4.2 Trabajo de producto, por impacto
 
@@ -303,5 +298,6 @@ bloquea al 1.
 | `430f7d4` | Este documento |
 | *(fusión)* | Integra Compra Guiada, perfil y canasta compartible desde upstream |
 
-El remoto `upstream` apunta al repositorio original `EMC-8/superprecios-qro`.
-`origin` apunta a `JETER3/superprecios-qro`, que es donde se está trabajando.
+El repositorio de trabajo es **`EMC-8/superprecios-qro`**. El fork
+`JETER3/superprecios-qro` sirvió para desarrollar la reescritura y queda como
+respaldo; no se trabaja ahí.
