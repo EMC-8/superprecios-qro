@@ -346,6 +346,7 @@ Procedimiento completo con verificación paso a paso en
 | Documento | Para qué |
 |---|---|
 | [`CONTINUIDAD.md`](CONTINUIDAD.md) | **Empieza aquí si retomas el proyecto.** Decisiones con su porqué, invariantes, deuda técnica. |
+| [`AGENTS.md`](AGENTS.md) | Instrucciones para agentes de código: reglas duras, trampas del repo y cómo verificar |
 | [`docs/despliegue.md`](docs/despliegue.md) | Runbook de Supabase y Vercel, con verificación en cada paso |
 | [`docs/scraping.md`](docs/scraping.md) | Fuentes de precios, qué se probó y qué se descartó |
 
