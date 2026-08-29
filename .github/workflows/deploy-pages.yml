@@ -25,8 +25,16 @@ jobs:
       - uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Stage public site allowlist
+        run: |
+          rm -rf _site
+          mkdir -p _site/css _site/js _site/assets
+          cp index.html manifest.webmanifest sw.js _site/
+          cp -R css/. _site/css/
+          cp -R js/. _site/js/
+          cp -R assets/. _site/assets/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
