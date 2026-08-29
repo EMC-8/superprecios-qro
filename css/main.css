@@ -134,6 +134,20 @@ body {
   gap: 10px;
 }
 
+.product-disclosure,
+.price-disclaimer {
+  border: 1px solid rgba(245, 158, 11, .38);
+  border-radius: var(--radius-md);
+  color: #fcd34d;
+  background: rgba(245, 158, 11, .09);
+  font-size: 13px;
+  margin: 0 0 20px;
+  padding: 12px 14px;
+}
+
+.product-disclosure strong { color: #fff; }
+.price-disclaimer { margin-bottom: 14px; }
+
 .install-btn {
   background: linear-gradient(135deg, var(--accent-emerald), #059669);
   color: #fff;
@@ -270,13 +284,13 @@ body {
 }
 
 .checkout-profile-card {
-  align-items: end;
+  align-items: center;
   background: rgba(16, 185, 129, .08);
   border: 1px solid rgba(16, 185, 129, .3);
   border-radius: var(--radius-lg);
   display: grid;
   gap: 16px;
-  grid-template-columns: minmax(0, 1fr) 160px auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   margin: 16px 0;
   padding: 20px;
 }

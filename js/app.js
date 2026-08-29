@@ -2,24 +2,24 @@
  * Aplicación Principal - SuperPrecios QRO (PWA)
  */
 
-import { SUPERMARKETS, CATEGORIES, PRODUCTS_CATALOG, SAMPLE_LISTS } from './data.js';
+import { SUPERMARKETS, CATEGORIES, PRODUCTS_CATALOG, SAMPLE_LISTS, PRICE_DATA_LABEL } from './data.js';
 import { parseShoppingListText, parseLine } from './parser.js';
 import { calculateOptimizations } from './optimizer.js';
 import { initPWA, promptInstallApp } from './pwa.js';
 import { buildShareUrl, copyText, formatStoreList, getOfficialProductUrl, getOfficialStoreUrl, readSharedCart } from './checkout.js';
-import { clearShopperProfile, isCheckoutReady, loadShopperProfile, saveShopperProfile } from './profile.js';
+import { clearShopperProfile, loadShopperProfile, saveShopperProfile } from './profile.js';
 
 // --- ESTADO GLOBAL DE LA APP ---
 const AppState = {
   currentTab: 'optimizer', // 'optimizer' | 'list' | 'catalog' | 'supermarket'
-  strategy: 'split',       // 'split' (Ahorro Máximo) | 'two-stores' (Práctica 2 tiendas) | 'single' (1 sola tienda)
+  strategy: 'split',       // 'split' (menor total estimado) | 'two-stores' (práctica) | 'single' (una tienda)
   shoppingList: [],
   checkedItems: {},        // { 'item-id-store-id': true }
   searchQuery: '',
   selectedCategory: 'all',
   activeStoreFilter: 'all',
   fulfillment: 'delivery',
-  shopperProfile: { postalCode: '', fulfillment: 'delivery', updatedAt: null }
+  shopperProfile: { fulfillment: 'delivery', updatedAt: null }
 };
 
 const STORAGE_KEY = 'superprecios_qro_list_v1';
@@ -320,11 +320,11 @@ function renderOptimizationResults() {
   if (AppState.strategy === 'split') {
     activeStoreGroups = opt.multiStore.storeGroups;
     currentTotal = opt.multiStore.total;
-    strategyBadge = '🌟 Máximo Ahorro (Compra Dividida)';
+    strategyBadge = '🌟 Menor total estimado (compra dividida)';
   } else if (AppState.strategy === 'two-stores' && opt.twoStoresCombo) {
     activeStoreGroups = opt.twoStoresCombo.storeGroups;
     currentTotal = opt.twoStoresCombo.total;
-    strategyBadge = '⚖️ Ruta Práctica (Máximo 2 Tiendas)';
+    strategyBadge = '⚖️ Ruta práctica estimada (máximo 2 tiendas)';
   } else {
     // 1 sola tienda (la mejor)
     const bestStore = opt.bestSingleStore;
@@ -362,7 +362,7 @@ function renderOptimizationResults() {
           <div class="progress-fill" style="width: ${widthPct}%; background: ${s.store.color}"></div>
         </div>
         <div class="store-diff-label">
-          ${isBest ? '⭐ Mejor opción individual' : `+ $${diffVsOptimized.toFixed(2)} vs ruta óptima`}
+          ${isBest ? '⭐ Menor total individual estimado' : `+ $${diffVsOptimized.toFixed(2)} vs ruta estimada`}
         </div>
       </div>
     `;
@@ -412,19 +412,19 @@ function renderOptimizationResults() {
   }).join('');
 
   container.innerHTML = `
-    <!-- Tarjeta de Ahorro Destacada -->
+    <p class="price-disclaimer">${PRICE_DATA_LABEL}. Los precios, stock, sucursal, sustituciones y total final pueden cambiar.</p>
     <div class="savings-hero-card">
       <div class="savings-badge">${strategyBadge}</div>
       <div class="savings-main-row">
         <div class="savings-col">
-          <span class="savings-label">Total a pagar con esta estrategia</span>
-          <h2 class="savings-total">$${currentTotal.toFixed(2)} <small>MXN</small></h2>
+          <span class="savings-label">Total estimado con esta estrategia</span>
+          <h2 class="savings-total">$${currentTotal.toFixed(2)} <small>MXN estimados</small></h2>
         </div>
         <div class="savings-delta-col">
           <div class="savings-delta-pill">
-            <span>🎉 Ahorras hasta</span>
+            <span>↔ Diferencia estimada</span>
             <strong>$${opt.savings.maxSavingsVsWorst.toFixed(2)} MXN</strong>
-            <small>(${opt.savings.savingsPercentage}% vs tienda más cara)</small>
+            <small>(${opt.savings.savingsPercentage}% vs la referencia más alta)</small>
           </div>
         </div>
       </div>
@@ -434,7 +434,7 @@ function renderOptimizationResults() {
           <strong>${activeStoreGroups.length}</strong>
         </div>
         <div class="insight-chip">
-          <span>🏆 Mejor súper único:</span>
+          <span>🏆 Menor referencia individual:</span>
           <strong>${opt.bestSingleStore.store.shortName} ($${opt.bestSingleStore.total.toFixed(2)})</strong>
         </div>
         <div class="insight-chip">
@@ -447,8 +447,8 @@ function renderOptimizationResults() {
     <!-- Comparativa Visual de la Canasta Completa -->
     <div class="section-card">
       <div class="section-title-row">
-        <h3>📊 Comparador de Canasta Completa en Querétaro</h3>
-        <span class="section-subtitle">Costo total si compraras todo en una sola tienda</span>
+        <h3>📊 Comparador estimado de canasta</h3>
+        <span class="section-subtitle">Referencia local si compraras todo en una sola tienda</span>
       </div>
       <div class="comparison-bars-container">
         ${comparisonBarsHtml}
@@ -504,32 +504,25 @@ function renderCheckout() {
   if (AppState.activeStoreFilter !== 'all') groups = groups.filter(group => group.store.id === AppState.activeStoreFilter);
   if (!groups.length) groups = getActiveStoreGroups();
   const fulfillmentLabel = AppState.fulfillment === 'pickup' ? 'Recoger en tienda' : 'Entrega a domicilio';
-  const checkoutReady = isCheckoutReady(AppState.shopperProfile);
-
   container.innerHTML = `
     <div class="checkout-intro-card">
-      <div><span class="checkout-eyebrow">Compra en canales oficiales</span><h2>Termina tu pedido con cada supermercado</h2><p>Abre la tienda oficial, agrega los productos y confirma ahí existencias, cobertura y costo final.</p></div>
+      <div><span class="checkout-eyebrow">Compra en canales oficiales</span><h2>Prepara la lista; finaliza con cada supermercado</h2><p>Esta app no crea carritos remotos. Abre la tienda oficial, busca los productos y confirma ahí existencia, sucursal, sustituciones, cobertura y costo final.</p></div>
       <div class="fulfillment-toggle" role="group" aria-label="Modalidad preferida">
         <button class="${AppState.fulfillment === 'delivery' ? 'active' : ''}" data-fulfillment="delivery">Entrega</button>
         <button class="${AppState.fulfillment === 'pickup' ? 'active' : ''}" data-fulfillment="pickup">Pickup</button>
       </div>
     </div>
-    <form class="checkout-profile-card" id="checkout-profile-form">
+    <section class="checkout-profile-card" aria-label="Privacidad y preferencias locales">
       <div class="checkout-profile-copy">
-        <span class="checkout-eyebrow">Tu zona de compra</span>
-        <h3>${checkoutReady ? 'Plan listo para continuar' : 'Personaliza tu entrega'}</h3>
-        <p>${checkoutReady ? `Código postal ${escapeHtml(AppState.shopperProfile.postalCode)}. La confirmación final seguirá siendo en cada tienda.` : 'Agrega tu código postal para recordar tu zona. No guardamos dirección ni datos de pago.'}</p>
+        <span class="checkout-eyebrow">Privacidad primero</span>
+        <h3>Solo guardamos tu preferencia de modalidad</h3>
+        <p>La canasta, el checklist y la preferencia Entrega/Pickup quedan en este navegador. No pedimos ni almacenamos contraseñas, dirección, tarjetas, CVV o datos de pago; tampoco se envían a los supermercados.</p>
       </div>
-      <label class="checkout-postal-field" for="checkout-postal-code">Código postal
-        <input id="checkout-postal-code" name="postalCode" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{5}" maxlength="5" placeholder="Ej. 76000" value="${escapeHtml(AppState.shopperProfile.postalCode)}">
-      </label>
       <div class="checkout-profile-actions">
-        <button class="primary-btn" type="submit">Guardar zona</button>
-        ${checkoutReady ? '<button class="text-btn" type="button" data-clear-profile>Quitar datos</button>' : ''}
+        <button class="text-btn" type="button" data-clear-profile>Eliminar preferencias locales</button>
       </div>
-      <p class="checkout-profile-message" aria-live="polite"></p>
-    </form>
-    <div class="checkout-notice">La modalidad es una preferencia. El supermercado confirma disponibilidad, mínimo de compra y cualquier costo al finalizar.</div>
+    </section>
+    <div class="checkout-notice">${PRICE_DATA_LABEL}. La modalidad es solo una preferencia: el supermercado confirma disponibilidad, precio, sucursal, mínimo de compra, sustituciones y cualquier costo al finalizar.</div>
     <div class="checkout-grid">${groups.map(group => renderCheckoutStore(group, fulfillmentLabel)).join('')}</div>
     <div class="checkout-share-row"><button class="secondary-btn" data-copy-share>Copiar enlace de esta canasta</button><span>Comparte la misma lista sin crear una cuenta.</span></div>`;
 
@@ -538,22 +531,6 @@ function renderCheckout() {
     AppState.shopperProfile = saveShopperProfile({ ...AppState.shopperProfile, fulfillment: AppState.fulfillment, updatedAt: new Date().toISOString() });
     renderCheckout();
   }));
-  container.querySelector('#checkout-profile-form').addEventListener('submit', event => {
-    event.preventDefault();
-    const postalCode = new FormData(event.currentTarget).get('postalCode');
-    const message = event.currentTarget.querySelector('.checkout-profile-message');
-    if (!postalCode) {
-      message.textContent = 'Ingresa un código postal de cinco dígitos para guardar tu zona.';
-      return;
-    }
-    try {
-      AppState.shopperProfile = saveShopperProfile({ postalCode, fulfillment: AppState.fulfillment, updatedAt: new Date().toISOString() });
-      message.textContent = 'Zona guardada en este dispositivo.';
-      renderCheckout();
-    } catch (error) {
-      message.textContent = error.message;
-    }
-  });
   container.querySelector('[data-clear-profile]')?.addEventListener('click', () => {
     AppState.shopperProfile = clearShopperProfile();
     AppState.fulfillment = AppState.shopperProfile.fulfillment;
@@ -577,7 +554,7 @@ function renderCheckoutStore(group, fulfillmentLabel) {
     const quantity = item.unit === 'kg' ? `${item.quantity} kg` : `${item.quantity} ${item.unit}`;
     return `<li><span>${escapeHtml(quantity)} ${escapeHtml(item.name)}</span><a href="${getOfficialProductUrl(store, item)}" target="_blank" rel="noopener noreferrer">Buscar ↗</a></li>`;
   }).join('');
-  return `<article class="checkout-store-card" style="--store-color:${store.color}"><header><div><span class="store-name">${escapeHtml(store.logoText)}</span><h3>${escapeHtml(store.name)}</h3></div><strong>$${group.subtotal.toFixed(2)}</strong></header><p>${items.length} productos. Preferencia: ${fulfillmentLabel}.</p><div class="checkout-actions"><a class="primary-btn official-store-link" href="${getOfficialStoreUrl(store)}" target="_blank" rel="noopener noreferrer">Abrir tienda oficial ↗</a><button class="secondary-btn" data-copy-list="${store.id}">Copiar lista</button></div><ul class="checkout-products">${products}</ul></article>`;
+  return `<article class="checkout-store-card" style="--store-color:${store.color}"><header><div><span class="store-name">${escapeHtml(store.logoText)}</span><h3>${escapeHtml(store.name)}</h3></div><strong>$${group.subtotal.toFixed(2)} est.</strong></header><p>${items.length} productos. Preferencia: ${fulfillmentLabel}. No es un carrito ni una reserva.</p><div class="checkout-actions"><a class="primary-btn official-store-link" href="${getOfficialStoreUrl(store)}" target="_blank" rel="noopener noreferrer">Abrir tienda oficial ↗</a><button class="secondary-btn" data-copy-list="${store.id}">Copiar lista</button></div><ul class="checkout-products">${products}</ul></article>`;
 }
 
 // --- MODO SUPERMERCADO (CHECKLIST INTERACTIVO) ---
@@ -782,16 +759,16 @@ function renderCatalog() {
         <div class="catalog-card-header">
           <span class="cat-tag">${CATEGORIES.find(c => c.id === prod.category)?.icon || '🛒'} ${prod.unit}</span>
           <span class="best-price-badge" style="color: ${bestStore.color}">
-            Desde $${bestPrice[1].toFixed(2)} (${bestStore.shortName})
+            Desde $${bestPrice[1].toFixed(2)} est. (${bestStore.shortName})
           </span>
         </div>
         <h4 class="product-title">${prod.name}</h4>
         ${prod.ean ? `
           <div class="ean-badge-row">
-            <span class="ean-pill" title="Código de barras oficial registrado">
+            <span class="ean-pill" title="Código de identificación del producto">
               🏷️ EAN: <strong>${prod.ean}</strong>
             </span>
-            <a href="${prod.officialRegistryUrl}" target="_blank" class="ean-verify-link">Verificar ↗</a>
+            <a href="${prod.officialRegistryUrl}" target="_blank" rel="noopener noreferrer" class="ean-verify-link">Consultar ↗</a>
           </div>
         ` : ''}
         
@@ -931,8 +908,9 @@ function shareListToWhatsApp() {
   if (!opt) return;
 
   let msg = `🛒 *Mi Ruta de Supermercados en Querétaro - SuperPrecios QRO*\n\n`;
-  msg += `💰 *Total Optimizado:* $${opt.multiStore.total.toFixed(2)} MXN\n`;
-  msg += `🎉 *Ahorro Estimado:* $${opt.savings.maxSavingsVsWorst.toFixed(2)} MXN (${opt.savings.savingsPercentage}%)\n\n`;
+  msg += `💰 *Total estimado:* $${opt.multiStore.total.toFixed(2)} MXN\n`;
+  msg += `↔ *Diferencia estimada:* $${opt.savings.maxSavingsVsWorst.toFixed(2)} MXN (${opt.savings.savingsPercentage}% vs referencia más alta)\n`;
+  msg += `Confirma precios, disponibilidad y total final en cada supermercado.\n\n`;
 
   for (const group of opt.multiStore.storeGroups) {
     msg += `📍 *${group.store.name}* (Subtotal: $${group.subtotal.toFixed(2)}):\n`;

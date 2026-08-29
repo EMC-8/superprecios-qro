@@ -1,12 +1,10 @@
 /**
- * Catálogo Oficial con Códigos de Barras EAN-13 / GTIN Verificados
- * y Precios Oficiales de Supermercados en México / Querétaro.
- * 
- * Cada producto cuenta con su código de barras oficial registrado ante GS1 México / OpenFoodFacts
- * y sus enlaces directos para consulta en tiempo real.
+ * Catálogo de referencia para preparar canastas.
+ * Los precios son ejemplos locales, no inventario ni precios en tiempo real.
+ * Cada compra debe verificarse y completarse en el sitio oficial del supermercado.
  */
 
-export const LAST_VERIFICATION_DATE = '29 de Agosto 2026';
+export const PRICE_DATA_LABEL = 'Referencia local de ejemplo — confirma en la tienda oficial';
 
 export const SUPERMARKETS = {
   aurrera: {
@@ -315,8 +313,8 @@ export const PRODUCTS_CATALOG = [
 export const SAMPLE_LISTS = [
   {
     id: 'canasta-basica-verificada',
-    title: '🛒 Canasta Básica Verificada (EAN)',
-    badge: '100% Oficial',
+    title: '🛒 Canasta básica de ejemplo',
+    badge: 'Ejemplo',
     description: 'Huevo San Juan, Leche Lala, Aceite Nutrioli, Arroz y Frijol Verde Valle, Pan Bimbo.',
     text: `1 huevo san juan
 2 leche lala entera

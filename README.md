@@ -1,6 +1,8 @@
 # SuperPrecios QRO 🥑🛒
 
-**SuperPrecios QRO** es una Progressive Web App (PWA) móvil y de escritorio diseñada para comparar y optimizar el costo de la canasta de compras entre las principales cadenas de supermercados en **Querétaro, México**:
+**SuperPrecios QRO** es una PWA para preparar una canasta y comparar referencias locales entre supermercados de **Querétaro, México**. No es una tienda ni procesa pedidos.
+
+> Importante: los precios son referencias locales de ejemplo, no precios ni inventario en tiempo real. Los importes, disponibilidad, sucursal, sustituciones y total final pueden cambiar. Confirma y completa cualquier compra exclusivamente en el dominio oficial de cada supermercado.
 - **Bodega Aurrera**
 - **Chedraui / Chedraui Selecto**
 - **Walmart Supercenter / Express**
@@ -13,9 +15,9 @@
 ## 🌟 Características Principales
 
 1. **⚡ Motor de Optimización de Rutas de Compra**:
-   - **🌟 Máximo Ahorro (Compra Dividida)**: Desglosa cada producto asignándolo a la tienda donde tiene el precio más bajo, calculando el ahorro total ($ y %).
-   - **⚖️ Ruta Práctica (Máximo 2 Tiendas)**: Algoritmo combinatorio de pares que encuentra la combinación óptima de 2 supermercados para balancear ahorro y tiempo de traslado.
-   - **🏪 Todo en 1 Sola Tienda**: Evalúa la canasta completa e identifica cuál es la tienda individual más económica.
+   - **🌟 Menor total estimado (Compra Dividida)**: Desglosa productos según las referencias locales disponibles.
+   - **⚖️ Ruta Práctica (Máximo 2 Tiendas)**: Calcula una combinación estimada para reducir visitas.
+   - **🏪 1 Sola Tienda**: Compara el total estimado de la canasta en cada cadena.
 2. **✍️ Parser Inteligente de Texto Libre**:
    - Permite escribir o pegar listas de compras en lenguaje natural (ej. `2kg pechuga de pollo, 1kg jitomate, 2 leche lala, 1 huevo san juan, 1 aceite nutrioli, 1 pan bimbo, 1 papel de bano`) reconociendo automáticamente cantidades, unidades y marcas.
 3. **🛒 Modo Supermercado (Checklist Interactivo)**:
@@ -27,11 +29,11 @@
 5. **↗ Compra en canales oficiales**:
    - Genera una lista por supermercado, enlaces oficiales de búsqueda por producto y un enlace compartible de la canasta.
    - El usuario final confirma en el sitio del supermercado la cobertura, inventario, entrega o pickup y cualquier cargo aplicable.
-6. **📍 Perfil local de compra**:
-   - Guarda únicamente código postal y preferencia de entrega o pickup en el dispositivo.
-   - No requiere cuenta, no guarda dirección ni datos de pago, y esos datos nunca viajan en el enlace de la canasta.
-5. **🏷️ Catálogo con Códigos de Barras Oficiales (EAN-13)**:
-   - Productos estandarizados con sus códigos GTIN/EAN-13 registrados ante GS1 México y enlaces de verificación.
+6. **🔒 Privacidad local**:
+   - Guarda en el navegador únicamente la canasta, checklist y preferencia Entrega/Pickup.
+   - Nunca solicita, captura, transmite ni almacena contraseñas, tarjetas, CVV, dirección completa o datos de pago.
+7. **🏷️ Catálogo de referencia**:
+   - Incluye identificadores EAN/GTIN y enlaces de consulta de producto cuando están disponibles.
 
 ---
 
@@ -77,9 +79,9 @@ Abre en tu navegador: `http://localhost:8080`
 npx serve .
 ```
 
-## Demo pública
+## GitHub Pages
 
-El repositorio incluye un workflow de GitHub Pages. Un administrador de `EMC-8` debe habilitar Pages para este repositorio y permitir que GitHub Actions cree el sitio. Después se ejecuta **Deploy demo to GitHub Pages** desde la pestaña Actions. El workflow se deja manual para evitar despliegues fallidos mientras esa configuración de organización no esté habilitada.
+El repositorio incluye un workflow que publica desde la rama `main` mediante GitHub Actions, además de permitir una ejecución manual. Pages debe estar habilitado para el repositorio sin cambiar su visibilidad. Si GitHub no permite publicar Pages para un repositorio privado con el plan actual, no se debe volver público el repositorio sin autorización explícita.
 
 ## Flujo de compra oficial
 
@@ -90,21 +92,9 @@ La pestaña **Comprar** separa la canasta según la estrategia elegida. Para cad
 - abrir la búsqueda oficial de cada producto;
 - compartir la misma canasta por URL.
 
-No se crea un carrito remoto automáticamente: Walmart, HEB, Chedraui, Soriana, La Comer y Bodega Aurrera no exponen una integración de carrito común y la disponibilidad, pickup, entrega y cargos dependen de la cuenta, código postal, sucursal e inventario del comprador. Esta separación evita presentar una promesa falsa al cliente.
+No se crea un carrito remoto automáticamente: la app ofrece una lista preparada, un enlace a cada tienda y búsquedas oficiales por producto. La disponibilidad, pickup, entrega, sustituciones y cargos dependen de la cuenta, sucursal e inventario del comprador. El inicio de sesión, dirección y pago ocurren exclusivamente con cada supermercado.
 
 ---
-
-## 🛠️ Guía para el Siguiente Desarrollador
-
-### 1. Conexión de Scrapers / Actualización en Tiempo Real
-Para alimentar `js/data.js` o una base de datos en **Supabase**:
-- Al hacer peticiones a las APIs o webs de supermercados (Walmart, Aurrera, Chedraui, Soriana), **es indispensable enviar el código postal de Querétaro en las cookies o headers** (ej. `postalCode: 76000` o `76230`), de lo contrario los sitios devolverán el catálogo de *Marketplace* en lugar del inventario de *Despensa/Súper físico*.
-
-### 2. Roadmap Recomendado
-- [ ] Conectar **Supabase (PostgreSQL)** para almacenar el histórico de precios diario por sucursal.
-- [ ] Implementar escáner de código de barras mediante la cámara usando `@zxing/library` o `html5-qrcode`.
-- [ ] Agregar soporte para subida de fotos de tickets con OCR (usando la API de Gemini Vision para extraer precios de tickets de compra físicos).
-- [ ] Desplegar en **Vercel** o **Cloudflare Pages** para CI/CD automático desde el repositorio de GitHub.
 
 ---
 

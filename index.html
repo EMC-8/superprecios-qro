@@ -2,9 +2,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SuperPrecios QRO - Comparador de Supermercados en Querétaro</title>
-  <meta name="description" content="Compara precios y ahorra en el súper en Querétaro. Descubre qué comprar en Walmart, HEB, Chedraui, Soriana, La Comer y Bodega Aurrera con el mejor precio.">
+  <meta name="description" content="Prepara una canasta y compara referencias de precio para supermercados de Querétaro. Confirma siempre en la tienda oficial.">
   <meta name="theme-color" content="#10b981">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -33,8 +33,8 @@
       </div>
       
       <div class="header-actions">
-        <div class="verified-badge" title="Precios verificados en sitios oficiales de supermercados">
-          🟢 Precios Oficiales Verificados
+        <div class="verified-badge" title="Las comparaciones usan referencias locales; confirma el precio y disponibilidad en el supermercado">
+          ⓘ Referencias estimadas
         </div>
         <div id="offline-badge" class="offline-badge hidden">📡 Offline</div>
         <button id="btn-install-app" class="install-btn hidden" title="Instalar aplicación en tu pantalla">
@@ -43,11 +43,15 @@
       </div>
     </header>
 
+    <aside class="product-disclosure" aria-label="Información importante sobre precios y privacidad">
+      <strong>Planea aquí; compra allá.</strong> Los importes son referencias locales de ejemplo, no precios en tiempo real. Nunca te pediremos contraseñas, tarjetas, CVV, dirección ni datos de pago; el pedido final ocurre únicamente en la tienda oficial.
+    </aside>
+
     <!-- Barra de Navegación por Pestañas -->
     <nav class="tabs-navigation" aria-label="Navegación principal">
       <button class="tab-btn active" data-tab="optimizer">
         <span class="tab-icon">⚡</span>
-        <span>Ahorro & Ruta</span>
+        <span>Comparar & Ruta</span>
       </button>
       <button class="tab-btn" data-tab="list">
         <span class="tab-icon">📝</span>
@@ -73,16 +77,16 @@
       <!-- Selector de Estrategia de Compra -->
       <div class="strategy-bar">
         <button class="strategy-pill active" data-strategy="split">
-          <strong>🌟 Máximo Ahorro</strong>
-          <small>Comprar cada ítem donde esté más barato</small>
+          <strong>🌟 Menor total estimado</strong>
+          <small>Según referencias locales por producto</small>
         </button>
         <button class="strategy-pill" data-strategy="two-stores">
           <strong>⚖️ Ruta Práctica (2 Tiendas)</strong>
-          <small>Alto ahorro visitando sólo 2 súper</small>
+          <small>Menor total estimado en hasta 2 súper</small>
         </button>
         <button class="strategy-pill" data-strategy="single">
           <strong>🏪 1 Sola Tienda</strong>
-          <small>El supermercado único más barato</small>
+          <small>Menor total individual estimado</small>
         </button>
       </div>
 
