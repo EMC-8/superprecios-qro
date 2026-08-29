@@ -8,39 +8,35 @@
 - **HEB Querétaro**
 - **La Comer / Fresko**
 
+> **Estado:** la aplicación funciona completa de punta a punta con la tabla de precios versionada en el repo. **Lo único que falta para producción es el scraping** que mantenga esos precios al día. Ver [Cómo conectar el scraping](#-cómo-conectar-el-scraping).
+
 ---
 
 ## 🌟 Características Principales
 
 1. **⚡ Motor de Optimización de Rutas de Compra**:
-   - **🌟 Máximo Ahorro (Compra Dividida)**: Desglosa cada producto asignándolo a la tienda donde tiene el precio más bajo, calculando el ahorro total ($ y %).
-   - **⚖️ Ruta Práctica (Máximo 2 Tiendas)**: Algoritmo combinatorio de pares que encuentra la combinación óptima de 2 supermercados para balancear ahorro y tiempo de traslado.
-   - **🏪 Todo en 1 Sola Tienda**: Evalúa la canasta completa e identifica cuál es la tienda individual más económica.
-2. **✍️ Parser Inteligente de Texto Libre**:
-   - Permite escribir o pegar listas de compras en lenguaje natural (ej. `2 leche lala, 1 huevo san juan, 500g queso panela, 1 aceite nutrioli, 1 pan bimbo, 1 papel de bano`) reconociendo automáticamente cantidades, unidades y marcas.
-   - Convierte medidas a presentaciones reales de venta: `500g queso panela` → **2 bloques de 400g**; `30 huevos` → **1 cartera de 30**. La conversión se muestra en la lista para que sea auditable.
-3. **🛒 Modo Supermercado (Checklist Interactivo)**:
-   - Lista interactiva filtrada por tienda con casillas para ir tachando productos en tiempo real en los pasillos físicos de la tienda.
-4. **📲 PWA Completa & Offline**:
-   - Service Worker con estrategia *Network First* y respaldo en caché. Funciona sin conexión a internet dentro del supermercado.
-   - Instalable como app nativa en Android, iOS y Desktop.
-   - Botón para compartir la ruta y desglose por WhatsApp.
-5. **🏷️ Catálogo con Códigos de Barras Oficiales (EAN-13)**:
-   - Productos estandarizados con sus códigos GTIN/EAN-13 registrados ante GS1 México y enlaces de verificación.
+   - **🌟 Máximo Ahorro (Compra Dividida)**: asigna cada producto a la tienda donde tiene el precio más bajo y calcula el ahorro total ($ y %).
+   - **⚖️ Ruta Práctica (Máximo 2 Tiendas)**: busca la mejor combinación de 2 supermercados. **La cobertura manda sobre el precio**: un par barato que no tiene la mitad de la canasta no es una ruta.
+   - **🏪 Todo en 1 Sola Tienda**: identifica el supermercado individual más económico que además tenga la canasta completa.
+2. **🏬 Selección de tiendas y sucursal**: eliges a qué cadenas puedes ir y qué sucursal de cada una te queda cerca. La optimización sólo considera esas, y la elección se recuerda entre sesiones.
+3. **✍️ Parser de texto libre**: escribe o pega la lista en lenguaje natural (`2 leche lala, 500g queso panela, 30 huevos, 1 papel de bano`). Reconoce cantidades, unidades y marcas, y **convierte medidas a presentaciones reales de venta**: `500g queso panela` → 2 bloques de 400 g; `30 huevos` → 1 cartera de 30. La conversión se muestra en la lista para que sea auditable.
+4. **🛒 Modo Supermercado**: checklist interactivo filtrado por tienda para ir tachando productos en los pasillos.
+5. **📲 PWA offline**: el app shell se sirve desde caché y los precios usan red-primero con respaldo local. Funciona sin señal dentro del súper. Instalable en Android, iOS y escritorio.
+6. **🏷️ Catálogo con EAN-13**: productos con su código GTIN/EAN-13 y enlace de verificación.
+7. **🔎 Honestidad de datos**: la app avisa cuando los precios están viejos, cuando está usando una copia local por falta de conexión, cuando un producto no tiene precio en las tiendas elegidas, y marca con `≈` todo lo que sea estimado.
 
 ---
 
 ## ⚠️ Sobre los precios (léelo antes de confiar en el total)
 
-Los precios viven en `js/data.js` y son **capturas manuales con fecha** (`LAST_VERIFICATION_DATE`), no una
-consulta en vivo a las tiendas. Pueden variar por sucursal, promoción y temporada.
+Los precios **no viven en el código**: viven en `data/prices.json` y son **capturas con fecha**, no una consulta en vivo. Pueden variar por sucursal, promoción y temporada.
 
-Los productos que **no** están en el catálogo (ej. frutas, verduras, carne) reciben un **precio estimado**
-generado por `estimatePricesForUnknown()`. Se marcan con `≈` en la interfaz y **no deben tomarse como reales**:
-sirven para que la lista no se rompa, no para decidir dónde comprar.
+Reglas que respeta el motor:
 
-Antes de publicar la app a usuarios reales, conecta una fuente de precios de verdad (ver *Guía para el
-siguiente desarrollador*).
+- **Un precio ausente NO vale cero.** Significa "no se sabe / no lo hay ahí". Tratarlo como cero haría ver baratísima a la tienda con menos datos, que es justo la conclusión contraria a la verdadera.
+- Una tienda que no cubre toda la canasta **nunca gana** la comparación de "1 sola tienda" frente a una que sí la cubre; su total se muestra marcado como parcial.
+- El ahorro se mide contra una tienda que **sí** tiene todo, para que el porcentaje sea real.
+- Los productos fuera del catálogo (frutas, verduras, carne) reciben un **precio estimado** de relleno. Se marcan con `≈` y sirven para que la lista no se rompa, **no** para decidir dónde comprar.
 
 ---
 
@@ -48,58 +44,114 @@ siguiente desarrollador*).
 
 ```
 superprecios-qro/
-├── index.html              # Interfaz principal semántica y vistas PWA
-├── manifest.webmanifest    # Manifiesto PWA para instalación móvil
-├── sw.js                   # Service Worker para caché y funcionamiento offline
+├── index.html                  # Interfaz principal y vistas PWA
+├── manifest.webmanifest        # Manifiesto PWA
+├── sw.js                       # Service Worker (app shell cache-first, precios network-first)
+├── vercel.json                 # Headers de despliegue estático
+├── data/
+│   └── prices.json             # ← LOS PRECIOS. Lo único que el scraper debe escribir.
 ├── css/
-│   ├── main.css            # Sistema de diseño, temas de cadenas y glassmorphism
-│   └── responsive.css      # Adaptabilidad móvil y barra inferior de navegación
+│   ├── main.css                # Sistema de diseño, temas de cadenas y glassmorphism
+│   └── responsive.css          # Móvil y barra inferior de navegación
 ├── js/
-│   ├── app.js              # Controlador principal y gestión de estado
-│   ├── data.js             # Catálogo de productos, códigos EAN y precios por cadena
-│   ├── optimizer.js        # Motor matemático de cálculo y optimización
-│   ├── parser.js           # Parser de lenguaje natural para listas escritas
-│   └── pwa.js              # Inicialización de Service Worker y banner de instalación
-├── assets/
-│   └── icons/
-│       ├── icon.svg        # Ícono maestro (fuente de los PNG)
-│       ├── icon-192.png    # Ícono PWA Android / precache
-│       └── icon-512.png    # Ícono PWA splash / instalación
-└── README.md
+│   ├── app.js                  # Controlador principal y gestión de estado
+│   ├── data.js                 # Catálogo (EAN, presentación, alias) y cadenas/sucursales
+│   ├── prices.js               # Carga, validación y caché de precios  ← contrato del scraper
+│   ├── optimizer.js            # Motor de cálculo y optimización
+│   ├── parser.js               # Parser de lenguaje natural
+│   └── pwa.js                  # Service Worker y banner de instalación
+├── scripts/
+│   └── validate-prices.mjs     # Valida data/prices.json contra el contrato
+├── test/
+│   ├── optimizer.test.mjs
+│   └── parser.test.mjs
+└── assets/icons/               # icon.svg + icon-192.png + icon-512.png
 ```
+
+**Separación de responsabilidades:** `data.js` describe *qué* productos existen (EAN, nombre, presentación, alias). `data/prices.json` dice *cuánto cuestan*. Los ítems de la lista guardan sólo el EAN y resuelven el precio al vuelo, así que **una lista guardada nunca se queda con precios viejos pegados**.
 
 ---
 
 ## 🚀 Cómo Ejecutar el Proyecto Localmente
 
-No requiere instalación de dependencias pesadas. Puedes servirlo con cualquier servidor HTTP local:
+No requiere dependencias. Sirve la carpeta con cualquier servidor HTTP:
 
-### Con Python:
 ```bash
 python -m http.server 8080
 ```
-Abre en tu navegador: `http://localhost:8080`
 
-### Con Node.js / npx (opcional):
+Abre `http://localhost:8080`. También `npm start`, o `npx serve .`.
+
+> Debe servirse por HTTP, no abriendo `index.html` como archivo: los módulos ES y el Service Worker requieren un origen `http(s)`.
+
+### Tests
+
 ```bash
-npx serve .
+npm test
+```
+
+30 pruebas sobre el parser (unidades, presentaciones, alias) y el optimizador (precios faltantes, cobertura, ahorro).
+
+### Validar la tabla de precios
+
+```bash
+npm run validate:prices
 ```
 
 ---
 
-## 🛠️ Guía para el Siguiente Desarrollador
+## 🔌 Cómo conectar el scraping
 
-### 1. Conexión de Scrapers / Actualización en Tiempo Real
-Para alimentar `js/data.js` o una base de datos en **Supabase**:
-- Al hacer peticiones a las APIs o webs de supermercados (Walmart, Aurrera, Chedraui, Soriana), **es indispensable enviar el código postal de Querétaro en las cookies o headers** (ej. `postalCode: 76000` o `76230`), de lo contrario los sitios devolverán el catálogo de *Marketplace* en lugar del inventario de *Despensa/Súper físico*.
+Esta es **la única pieza que falta**. La app entera consume un solo archivo, así que un scraper no necesita tocar JavaScript: le basta con escribir `data/prices.json` con este esquema.
 
-### 2. Roadmap Recomendado
-- [ ] Conectar **Supabase (PostgreSQL)** para almacenar el histórico de precios diario por sucursal.
-- [ ] Implementar escáner de código de barras mediante la cámara usando `@zxing/library` o `html5-qrcode`.
-- [ ] Agregar soporte para subida de fotos de tickets con OCR (usando la API de Gemini Vision para extraer precios de tickets de compra físicos).
-- [ ] Desplegar en **Vercel** o **Cloudflare Pages** para CI/CD automático desde el repositorio de GitHub.
+```json
+{
+  "generatedAt": "2026-08-29T06:00:00.000Z",
+  "source": "scraper-v1",
+  "sourceLabel": "Scraping de sitios oficiales",
+  "currency": "MXN",
+  "region": "Queretaro, Qro., MX",
+  "postalCode": "76000",
+  "products": {
+    "7501020513478": { "aurrera": 29.00, "walmart": 30.00, "heb": 29.90 }
+  }
+}
+```
+
+Reglas del contrato:
+
+| Regla | Detalle |
+|---|---|
+| Llaves de `products` | EAN-13 que exista en `PRODUCTS_CATALOG` (`js/data.js`) |
+| Llaves internas | `storeId` que exista en `SUPERMARKETS` (`js/data.js`) |
+| Precio ausente | Significa **"no se conoce"**, no cero. Simplemente omite la llave. |
+| Precio inválido | `<= 0` o no numérico se descarta al cargar |
+| `generatedAt` | ISO-8601 obligatorio; la app lo usa para avisar si los precios están viejos |
+
+Después de generarlo, verifica que cumple antes de publicar:
+
+```bash
+node scripts/validate-prices.mjs data/prices.json
+```
+
+El script reporta cobertura por tienda, productos sin precio y sale con código distinto de cero si algo no cumple, así que sirve tal cual en CI.
+
+### Nota indispensable para el scraper
+
+Al pedir datos a las webs o APIs de los supermercados (Walmart, Aurrera, Chedraui, Soriana), **es obligatorio enviar el código postal de Querétaro en cookies o headers** (ej. `postalCode: 76000` o `76230`). Sin eso, los sitios devuelven el catálogo de *Marketplace* en lugar del inventario de *Despensa/Súper físico*, y los precios no corresponden a la tienda a la que el usuario va a ir.
+
+---
+
+## 🛠️ Roadmap posterior al scraping
+
+- [ ] Histórico de precios por sucursal (Supabase/PostgreSQL) para graficar tendencias.
+- [ ] Escáner de código de barras con la cámara (`@zxing/library` o `html5-qrcode`); el catálogo ya está indexado por EAN-13.
+- [ ] Ampliar el catálogo a perecederos (frutas, verduras, carne), que hoy caen en precio estimado y son los que más varían.
+- [ ] Precios diferenciados por sucursal (la estructura de sucursales ya existe en `data.js`; el esquema de precios necesitaría un nivel más).
+- [ ] OCR de tickets para capturar precios reales de caja.
+- [ ] Despliegue con CI/CD y un job programado que corra el scraper y publique `data/prices.json`.
 
 ---
 
 ## 📄 Licencia
-MIT License - Desarrollado para la comunidad de Querétaro.
+MIT — ver [LICENSE](LICENSE). Desarrollado para la comunidad de Querétaro.

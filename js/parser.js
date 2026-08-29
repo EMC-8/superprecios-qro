@@ -131,11 +131,11 @@ export function parseLine(line) {
     return {
       id: matchedProduct.id,
       catalogId: matchedProduct.id,
+      ean: matchedProduct.ean,
       name: matchedProduct.name,
       category: matchedProduct.category,
       unit: matchedProduct.unit,
       quantity: quantity,
-      prices: matchedProduct.prices,
       rawInput: originalText,
       measureNote: measureNote,
       isCustom: false
@@ -154,15 +154,15 @@ export function parseLine(line) {
     customQty = amount / 1000;
   }
 
-  const fallbackPrices = estimatePricesForUnknown(searchTerm);
   return {
     id: 'custom-' + Math.random().toString(36).substr(2, 9),
     catalogId: null,
+    ean: null,
     name: capitalize(originalText.replace(QTY_REGEX, '$3').trim() || originalText),
     category: 'despensa',
     unit: customUnit,
     quantity: customQty,
-    prices: fallbackPrices,
+    estimatedPrices: estimatePricesForUnknown(searchTerm),
     rawInput: originalText,
     measureNote: null,
     isEstimatedPrice: true,
@@ -248,8 +248,12 @@ export function parseShoppingListText(rawText) {
   return items;
 }
 
+/**
+ * Precios de relleno para lo que no está en el catálogo.
+ * NO son precios reales: existen para que la lista no se rompa, y quien los use
+ * tiene que marcarlos (isEstimatedPrice) para que el usuario no los confunda.
+ */
 function estimatePricesForUnknown(term) {
-  // Precios referenciales genéricos para artículos no catalogados
   const base = 35.0;
   return {
     aurrera: Math.round(base * 0.94 * 10) / 10,

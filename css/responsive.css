@@ -128,3 +128,30 @@
     font-size: 16px;
   }
 }
+
+@media (max-width: 768px) {
+  .store-selector-chips {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .store-toggle {
+    padding: 8px 10px;
+  }
+
+  .store-toggle-main {
+    font-size: 12.5px;
+  }
+
+  .store-toggle-zone {
+    display: none;
+  }
+
+  .store-selector-header h3 {
+    font-size: 13.5px;
+  }
+
+  .warning-strip {
+    font-size: 12.5px;
+  }
+}

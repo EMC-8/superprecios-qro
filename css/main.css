@@ -1330,3 +1330,185 @@ body {
 .hidden {
   display: none !important;
 }
+
+/* ============================================================
+   SELECTOR DE TIENDAS, AVISOS DE DATOS Y ESTADOS SIN PRECIO
+   ============================================================ */
+
+.store-selector-card {
+  background: var(--surface-1, rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg, 16px);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.store-selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.store-selector-header h3 {
+  font-size: 15px;
+  margin: 0;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: #34d399;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+
+.link-btn:hover {
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.store-selector-chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+}
+
+.store-toggle {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 4px solid var(--store-color, #10b981);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.store-toggle.is-off {
+  opacity: 0.45;
+  border-left-color: rgba(255, 255, 255, 0.2);
+}
+
+.store-toggle-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13.5px;
+}
+
+.store-toggle-check {
+  width: 16px;
+  height: 16px;
+  accent-color: #10b981;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.branch-select {
+  width: 100%;
+  margin-top: 8px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-primary, #e5e7eb);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.branch-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.store-toggle-zone {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-muted, #9ca3af);
+}
+
+/* --- Avisos --- */
+
+.data-warnings:empty {
+  display: none;
+}
+
+.warning-strip {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 10px 13px;
+  margin-bottom: 8px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  border: 1px solid transparent;
+}
+
+.warning-strip p {
+  margin: 0;
+}
+
+.warning-strip code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 12px;
+}
+
+.warning-strip.is-info {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.28);
+  color: #93c5fd;
+}
+
+.warning-strip.is-warn {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+.warning-strip.is-error {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+/* --- Badge de origen de precios en estado degradado --- */
+
+.verified-badge.is-warning {
+  background: rgba(245, 158, 11, 0.14);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+}
+
+.verified-badge.is-error {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.38);
+  color: #fca5a5;
+}
+
+/* --- Producto sin precio en el catálogo --- */
+
+.catalog-card.is-unpriced {
+  opacity: 0.72;
+  border-style: dashed;
+}
+
+.best-price-badge.no-price {
+  color: var(--text-muted, #9ca3af);
+  font-weight: 600;
+}
+
+.no-price-note {
+  font-size: 12px;
+  color: var(--text-muted, #9ca3af);
+  margin: 8px 0 12px;
+  line-height: 1.4;
+}

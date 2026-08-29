@@ -1,0 +1,162 @@
+{
+  "generatedAt": "2026-08-29T06:00:00.000Z",
+  "source": "captura-manual",
+  "sourceLabel": "Captura manual en sitios oficiales",
+  "currency": "MXN",
+  "region": "Queretaro, Qro., MX",
+  "postalCode": "76000",
+  "products": {
+    "7501020513478": {
+      "aurrera": 29.0,
+      "chedraui": 30.0,
+      "heb": 29.9,
+      "lacomer": 31.5,
+      "soriana": 30.5,
+      "walmart": 30.0
+    },
+    "7501166300405": {
+      "aurrera": 64.0,
+      "chedraui": 65.0,
+      "heb": 62.0,
+      "lacomer": 72.0,
+      "soriana": 64.9,
+      "walmart": 66.0
+    },
+    "7501040001019": {
+      "aurrera": 64.0,
+      "chedraui": 63.5,
+      "heb": 69.5,
+      "lacomer": 74.0,
+      "soriana": 67.0,
+      "walmart": 68.0
+    },
+    "7501020521015": {
+      "aurrera": 29.0,
+      "chedraui": 29.5,
+      "heb": 31.0,
+      "lacomer": 34.0,
+      "soriana": 31.0,
+      "walmart": 31.5
+    },
+    "7501039100063": {
+      "aurrera": 39.9,
+      "chedraui": 41.9,
+      "heb": 42.5,
+      "lacomer": 46.0,
+      "soriana": 42.9,
+      "walmart": 43.0
+    },
+    "7501078100119": {
+      "aurrera": 34.5,
+      "chedraui": 35.0,
+      "heb": 37.9,
+      "lacomer": 41.5,
+      "soriana": 37.5,
+      "walmart": 38.0
+    },
+    "7501078100232": {
+      "aurrera": 39.9,
+      "chedraui": 41.0,
+      "heb": 43.5,
+      "lacomer": 47.0,
+      "soriana": 43.9,
+      "walmart": 44.5
+    },
+    "7501045401340": {
+      "aurrera": 20.9,
+      "chedraui": 21.5,
+      "heb": 22.5,
+      "lacomer": 25.0,
+      "soriana": 22.5,
+      "walmart": 23.0
+    },
+    "7501005101019": {
+      "aurrera": 45.0,
+      "chedraui": 44.5,
+      "heb": 47.5,
+      "lacomer": 53.0,
+      "soriana": 48.0,
+      "walmart": 49.0
+    },
+    "7501058617873": {
+      "aurrera": 76.0,
+      "chedraui": 77.5,
+      "heb": 81.0,
+      "lacomer": 89.0,
+      "soriana": 81.0,
+      "walmart": 82.5
+    },
+    "7501075600025": {
+      "aurrera": 21.5,
+      "chedraui": 21.0,
+      "heb": 22.5,
+      "lacomer": 26.5,
+      "soriana": 23.5,
+      "walmart": 24.0
+    },
+    "7501000111204": {
+      "aurrera": 49.0,
+      "chedraui": 51.0,
+      "heb": 52.5,
+      "lacomer": 56.0,
+      "soriana": 53.9,
+      "walmart": 52.0
+    },
+    "7501943440129": {
+      "aurrera": 85.5,
+      "chedraui": 84.0,
+      "heb": 91.5,
+      "lacomer": 99.0,
+      "soriana": 89.9,
+      "walmart": 92.0
+    },
+    "7500435128031": {
+      "aurrera": 41.0,
+      "chedraui": 39.9,
+      "heb": 44.5,
+      "lacomer": 49.0,
+      "soriana": 44.0,
+      "walmart": 45.0
+    },
+    "7501025400032": {
+      "aurrera": 16.5,
+      "chedraui": 16.9,
+      "heb": 18.5,
+      "lacomer": 21.0,
+      "soriana": 18.0,
+      "walmart": 19.0
+    },
+    "7509546071856": {
+      "aurrera": 36.0,
+      "chedraui": 35.5,
+      "heb": 39.0,
+      "lacomer": 43.5,
+      "soriana": 38.9,
+      "walmart": 40.0
+    },
+    "7501055304745": {
+      "aurrera": 36.0,
+      "chedraui": 37.0,
+      "heb": 38.0,
+      "lacomer": 41.0,
+      "soriana": 38.0,
+      "walmart": 38.5
+    },
+    "7501064191343": {
+      "aurrera": 96.0,
+      "chedraui": 94.0,
+      "heb": 100.0,
+      "lacomer": 110.0,
+      "soriana": 102.0,
+      "walmart": 104.0
+    },
+    "7501003601559": {
+      "aurrera": 34.0,
+      "chedraui": 33.5,
+      "heb": 36.5,
+      "lacomer": 41.0,
+      "soriana": 36.0,
+      "walmart": 37.0
+    }
+  }
+}

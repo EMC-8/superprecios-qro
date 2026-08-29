@@ -1,0 +1,17 @@
+{
+  "name": "superprecios-qro",
+  "version": "1.0.0",
+  "description": "PWA para comparar y optimizar el costo de la canasta entre supermercados de Queretaro, Mexico.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "python -m http.server 8080",
+    "test": "node --test test/*.test.mjs",
+    "validate:prices": "node scripts/validate-prices.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EMC-8/superprecios-qro.git"
+  }
+}

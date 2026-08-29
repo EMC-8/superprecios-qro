@@ -66,6 +66,20 @@
 
     <!-- PANE 1: OPTIMIZADOR Y RUTA DE COMPRA -->
     <section id="tab-optimizer" class="tab-pane active">
+      <!-- Tiendas que el usuario está dispuesto a visitar -->
+      <div class="store-selector-card">
+        <div class="store-selector-header">
+          <h3>🏬 ¿A qué supermercados puedes ir?</h3>
+          <button id="btn-toggle-all-stores" class="link-btn">Seleccionar todas</button>
+        </div>
+        <div id="store-selector-chips" class="store-selector-chips">
+          <!-- Renderizado dinámicamente por app.js -->
+        </div>
+      </div>
+
+      <!-- Avisos sobre la calidad de los datos (precios viejos, productos sin precio) -->
+      <div id="data-warnings" class="data-warnings"></div>
+
       <!-- Selector de Estrategia de Compra -->
       <div class="strategy-bar">
         <button class="strategy-pill active" data-strategy="split">

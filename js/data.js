@@ -1,12 +1,14 @@
 /**
- * Catálogo Oficial con Códigos de Barras EAN-13 / GTIN Verificados
- * y Precios Oficiales de Supermercados en México / Querétaro.
- * 
- * Cada producto cuenta con su código de barras oficial registrado ante GS1 México / OpenFoodFacts
- * y sus enlaces directos para consulta en tiempo real.
+ * Catálogo de productos y cadenas de supermercado.
+ *
+ * Este archivo describe QUÉ existe: productos con su EAN-13, su presentación
+ * real de venta y sus alias de búsqueda; y las cadenas con sus sucursales de
+ * Querétaro.
+ *
+ * CUÁNTO cuestan es otra cosa y vive en `data/prices.json`, que se carga con
+ * `js/prices.js`. Mantenerlos separados es lo que permite actualizar precios
+ * sin tocar código y que una lista guardada no se quede con precios viejos.
  */
-
-export const LAST_VERIFICATION_DATE = '29 de Agosto 2026';
 
 export const SUPERMARKETS = {
   aurrera: {
@@ -120,8 +122,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     pack: { amount: 1000, unit: 'ml' },  // presentacion real de venta
     aliases: ['leche', 'leche lala', 'leche entera', 'lala entera', 'leche lala 1l', '7501020513478'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501020513478',
-    prices: { aurrera: 29.00, chedraui: 30.00, walmart: 30.00, soriana: 30.50, heb: 29.90, lacomer: 31.50 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501020513478'
   },
   {
     id: 'huevo-blanco-san-juan-30pz',
@@ -131,8 +132,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pqte',
     pack: { amount: 30, unit: 'pz' },  // presentacion real de venta
     aliases: ['huevo', 'huevos', 'huevo san juan', 'cartera de huevo', 'huevo blanco', '30 huevos', '7501166300405'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501166300405',
-    prices: { aurrera: 64.00, chedraui: 65.00, soriana: 64.90, heb: 62.00, walmart: 66.00, lacomer: 72.00 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501166300405'
   },
   {
     id: 'queso-panela-fud-400g',
@@ -142,8 +142,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     pack: { amount: 400, unit: 'g' },  // presentacion real de venta
     aliases: ['queso panela', 'panela', 'queso panela fud', 'panela fud', '7501040001019'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501040001019',
-    prices: { aurrera: 64.00, chedraui: 63.50, soriana: 67.00, walmart: 68.00, heb: 69.50, lacomer: 74.00 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501040001019'
   },
   {
     id: 'crema-lala-acida-450ml',
@@ -153,8 +152,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     pack: { amount: 450, unit: 'ml' },  // presentacion real de venta
     aliases: ['crema', 'crema lala', 'crema acida', '7501020521015'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501020521015',
-    prices: { aurrera: 29.00, chedraui: 29.50, walmart: 31.50, soriana: 31.00, heb: 31.00, lacomer: 34.00 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501020521015'
   },
 
   // 2. DESPENSA Y ABARROTES (EAN-13 Verificados)
@@ -166,8 +164,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     pack: { amount: 850, unit: 'ml' },  // presentacion real de venta
     aliases: ['aceite', 'aceite nutrioli', 'aceite vegetal', 'nutrioli', '7501039100063'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501039100063',
-    prices: { aurrera: 39.90, chedraui: 41.90, soriana: 42.90, heb: 42.50, walmart: 43.00, lacomer: 46.00 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501039100063'
   },
   {
     id: 'arroz-super-extra-verde-valle-900g',
@@ -177,8 +174,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     pack: { amount: 900, unit: 'g' },  // presentacion real de venta
     aliases: ['arroz', 'arroz verde valle', 'arroz super extra', '7501078100119'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501078100119',
-    prices: { aurrera: 34.50, chedraui: 35.00, soriana: 37.50, heb: 37.90, walmart: 38.00, lacomer: 41.50 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501078100119'
   },
   {
     id: 'frijol-negro-verde-valle-900g',
@@ -188,8 +184,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     pack: { amount: 900, unit: 'g' },  // presentacion real de venta
     aliases: ['frijol', 'frijoles', 'frijol negro', 'frijoles negros', 'frijol verde valle', '7501078100232'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501078100232',
-    prices: { aurrera: 39.90, chedraui: 41.00, soriana: 43.90, heb: 43.50, walmart: 44.50, lacomer: 47.00 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501078100232'
   },
   {
     id: 'atun-en-agua-dolores-140g',
@@ -199,8 +194,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     pack: { amount: 140, unit: 'g' },  // presentacion real de venta
     aliases: ['atun', 'atun dolores', 'atun en agua', 'lata de atun', '7501045401340'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501045401340',
-    prices: { aurrera: 20.90, chedraui: 21.50, heb: 22.50, soriana: 22.50, walmart: 23.00, lacomer: 25.00 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501045401340'
   },
   {
     id: 'mayonesa-mccormick-con-limon-390g',
@@ -210,8 +204,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     pack: { amount: 390, unit: 'g' },  // presentacion real de venta
     aliases: ['mayonesa', 'mayonesa mccormick', 'mccormick', '7501005101019'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501005101019',
-    prices: { aurrera: 45.00, chedraui: 44.50, soriana: 48.00, heb: 47.50, walmart: 49.00, lacomer: 53.00 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501005101019'
   },
   {
     id: 'cafe-nescafe-clasico-120g',
@@ -221,8 +214,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     pack: { amount: 120, unit: 'g' },  // presentacion real de venta
     aliases: ['cafe', 'nescafe', 'cafe soluble', 'nescafe clasico', '7501058617873'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501058617873',
-    prices: { aurrera: 76.00, chedraui: 77.50, soriana: 81.00, heb: 81.00, walmart: 82.50, lacomer: 89.00 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501058617873'
   },
   {
     id: 'pasta-espagueti-barilla-500g',
@@ -232,8 +224,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     pack: { amount: 500, unit: 'g' },  // presentacion real de venta
     aliases: ['pasta', 'espagueti', 'spaghetti', 'pasta barilla', '7501075600025'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501075600025',
-    prices: { aurrera: 21.50, chedraui: 21.00, soriana: 23.50, heb: 22.50, walmart: 24.00, lacomer: 26.50 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501075600025'
   },
 
   // 3. PANADERÍA (EAN-13 Verificados)
@@ -245,8 +236,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     pack: { amount: 620, unit: 'g' },  // presentacion real de venta
     aliases: ['pan bimbo', 'pan blanco', 'pan de caja', 'bimbo grande', 'pan', '7501000111204'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501000111204',
-    prices: { aurrera: 49.00, chedraui: 51.00, walmart: 52.00, heb: 52.50, soriana: 53.90, lacomer: 56.00 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501000111204'
   },
 
   // 4. LIMPIEZA Y HOGAR (EAN-13 Verificados)
@@ -258,8 +248,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pqte',
     pack: { amount: 12, unit: 'pz' },  // presentacion real de venta
     aliases: ['papel de bano', 'papel higienico', 'petalo', 'papel del bano', '7501943440129'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501943440129',
-    prices: { chedraui: 84.00, aurrera: 85.50, soriana: 89.90, heb: 91.50, walmart: 92.00, lacomer: 99.00 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501943440129'
   },
   {
     id: 'detergente-ariel-polvo-doble-poder-1kg',
@@ -269,8 +258,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     pack: { amount: 1000, unit: 'g' },  // presentacion real de venta
     aliases: ['detergente', 'ariel', 'detergente ariel', 'jabon en polvo', '7500435128031'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7500435128031',
-    prices: { chedraui: 39.90, aurrera: 41.00, soriana: 44.00, heb: 44.50, walmart: 45.00, lacomer: 49.00 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7500435128031'
   },
   {
     id: 'cloro-cloralex-el-rendidor-950ml',
@@ -280,8 +268,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     pack: { amount: 950, unit: 'ml' },  // presentacion real de venta
     aliases: ['cloro', 'cloralex', 'cloro liquido', 'blanqueador', '7501025400032'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501025400032',
-    prices: { aurrera: 16.50, chedraui: 16.90, soriana: 18.00, heb: 18.50, walmart: 19.00, lacomer: 21.00 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501025400032'
   },
   {
     id: 'lavatrastes-axion-limon-750ml',
@@ -291,8 +278,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     pack: { amount: 750, unit: 'ml' },  // presentacion real de venta
     aliases: ['axion', 'jabon para trastes', 'lavatrastes', 'axion limon', '7509546071856'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7509546071856',
-    prices: { chedraui: 35.50, aurrera: 36.00, soriana: 38.90, heb: 39.00, walmart: 40.00, lacomer: 43.50 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7509546071856'
   },
 
   // 5. BEBIDAS Y LÍQUIDOS (EAN-13 Verificados)
@@ -304,8 +290,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'pz',
     pack: { amount: 2500, unit: 'ml' },  // presentacion real de venta
     aliases: ['coca cola', 'coca', 'refresco', 'coca 2.5l', '7501055304745'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501055304745',
-    prices: { aurrera: 36.00, chedraui: 37.00, soriana: 38.00, heb: 38.00, walmart: 38.50, lacomer: 41.00 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501055304745'
   },
   {
     id: 'cerveza-corona-extra-6pack-latas',
@@ -315,8 +300,7 @@ export const PRODUCTS_CATALOG = [
     unit: 'sixpack',
     pack: { amount: 6, unit: 'pz' },  // presentacion real de venta
     aliases: ['cerveza', 'corona', 'chelas', 'six de corona', '7501064191343'],
-    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501064191343',
-    prices: { chedraui: 94.00, aurrera: 96.00, heb: 100.00, soriana: 102.00, walmart: 104.00, lacomer: 110.00 }
+    officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501064191343'
   },
   {
     id: 'agua-purificada-bonafont-6l',
@@ -327,7 +311,6 @@ export const PRODUCTS_CATALOG = [
     pack: { amount: 6000, unit: 'ml' },  // presentacion real de venta
     aliases: ['agua', 'bonafont', 'garrafon de agua', 'agua 6l', '7501003601559'],
     officialRegistryUrl: 'https://world.openfoodfacts.org/product/7501003601559',
-    prices: { chedraui: 33.50, aurrera: 34.00, soriana: 36.00, heb: 36.50, walmart: 37.00, lacomer: 41.00 }
   }
 ];
 

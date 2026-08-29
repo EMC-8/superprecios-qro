@@ -2,9 +2,10 @@
  * Aplicación Principal - SuperPrecios QRO (PWA)
  */
 
-import { SUPERMARKETS, CATEGORIES, PRODUCTS_CATALOG, SAMPLE_LISTS, LAST_VERIFICATION_DATE } from './data.js';
-import { parseShoppingListText, parseLine } from './parser.js';
+import { SUPERMARKETS, CATEGORIES, PRODUCTS_CATALOG, SAMPLE_LISTS } from './data.js';
+import { parseShoppingListText } from './parser.js';
 import { calculateOptimizations } from './optimizer.js';
+import { loadPriceTable } from './prices.js';
 import { initPWA, promptInstallApp } from './pwa.js';
 
 // --- ESTADO GLOBAL DE LA APP ---
@@ -15,16 +16,21 @@ const AppState = {
   checkedItems: {},        // { 'item-id-store-id': true }
   searchQuery: '',
   selectedCategory: 'all',
-  activeStoreFilter: 'all'
+  activeStoreFilter: 'all',
+  priceTable: null,          // tabla de precios cargada (js/prices.js)
+  enabledStores: [],         // tiendas que el usuario está dispuesto a visitar
+  selectedBranches: {}       // { storeId: índice de sucursal }
 };
 
 // v2: las cantidades ahora se guardan siempre en presentaciones de venta (ver parser.js).
 // Subir la versión descarta las listas guardadas con el formato viejo en vez de mostrarlas mal.
-const STORAGE_KEY = 'superprecios_qro_list_v2';
-const CHECKED_KEY = 'superprecios_qro_checked_v2';
+const STORAGE_KEY = 'superprecios_qro_list_v3';
+const CHECKED_KEY = 'superprecios_qro_checked_v3';
+const STORES_KEY = 'superprecios_qro_stores_v1';
+const BRANCHES_KEY = 'superprecios_qro_branches_v1';
 
 // --- INICIALIZACIÓN ---
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   loadSavedState();
   initPWA((installAvailable) => {
     const installBtn = document.getElementById('btn-install-app');
@@ -34,6 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   setupEventListeners();
+  renderStoreSelector();
+
+  // Sin precios no hay nada que optimizar, así que se cargan antes del primer render.
+  AppState.priceTable = await loadPriceTable();
   renderPriceSourceBadge();
   renderAll();
 });
@@ -45,19 +55,70 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 function renderPriceSourceBadge() {
   const badge = document.getElementById('price-source-badge');
-  if (!badge) return;
-  badge.textContent = `🏷️ Precios de referencia · ${LAST_VERIFICATION_DATE}`;
-  badge.title = `Precios capturados manualmente de los sitios oficiales el ${LAST_VERIFICATION_DATE}. `
-    + 'No son una consulta en vivo y pueden variar por sucursal y promociones. '
+  const table = AppState.priceTable;
+  if (!badge || !table) return;
+
+  if (table.isEmpty) {
+    badge.textContent = '⚠️ Sin precios cargados';
+    badge.title = 'No se pudo leer data/prices.json ni la copia local. Los totales no están disponibles.';
+    badge.classList.add('is-error');
+    return;
+  }
+
+  badge.classList.toggle('is-warning', table.isStale());
+  const origen = table.origin === 'cache' ? ' · copia local' : '';
+  badge.textContent = `🏷️ Precios ${table.freshnessLabel()}${origen}`;
+  badge.title = `${table.meta.sourceLabel}. ${table.pricedProductCount} productos con precio. `
+    + `Actualizado ${table.freshnessLabel()}${table.meta.region ? ' para ' + table.meta.region : ''}. `
+    + 'No es una consulta en vivo: puede variar por sucursal y promociones. '
     + 'Los productos fuera del catálogo usan precios estimados, marcados con ≈.';
 }
 
 // --- PERSISTENCIA LOCALSTORAGE ---
+
+/**
+ * Repara un ítem guardado para que sirva con el esquema actual.
+ *
+ * Las listas viejas guardaban los precios pegados al ítem y no traían EAN.
+ * Ahora los precios se resuelven por EAN contra la tabla, así que un ítem sin
+ * EAN quedaría "sin precio" para siempre. En vez de descartar la lista del
+ * usuario, se vuelve a colgar del catálogo por su catalogId.
+ */
+function hydrateItem(item) {
+  if (!item || typeof item !== 'object') return null;
+
+  const fromCatalog = item.catalogId
+    ? PRODUCTS_CATALOG.find(p => p.id === item.catalogId)
+    : null;
+
+  if (fromCatalog) {
+    const { prices, ...rest } = item;   // los precios ya no viven en el ítem
+    return {
+      ...rest,
+      ean: fromCatalog.ean,
+      name: fromCatalog.name,
+      category: fromCatalog.category,
+      unit: fromCatalog.unit,
+      isCustom: false
+    };
+  }
+
+  // Ítem personalizado: conserva sus precios estimados, vengan del nombre viejo o del nuevo.
+  const { prices, ...rest } = item;
+  return {
+    ...rest,
+    ean: null,
+    isCustom: true,
+    isEstimatedPrice: true,
+    estimatedPrices: item.estimatedPrices || prices || {}
+  };
+}
+
 function loadSavedState() {
   try {
     const savedList = localStorage.getItem(STORAGE_KEY);
     if (savedList) {
-      AppState.shoppingList = JSON.parse(savedList);
+      AppState.shoppingList = (JSON.parse(savedList) || []).map(hydrateItem).filter(Boolean);
     } else {
       // Cargar lista de muestra por defecto si está vacío
       const defaultSample = SAMPLE_LISTS[0];
@@ -68,8 +129,17 @@ function loadSavedState() {
     if (savedChecked) {
       AppState.checkedItems = JSON.parse(savedChecked);
     }
+
+    const savedStores = JSON.parse(localStorage.getItem(STORES_KEY) || 'null');
+    // Por defecto se consideran todas las cadenas; el usuario va quitando las que no le quedan.
+    AppState.enabledStores = Array.isArray(savedStores) && savedStores.length > 0
+      ? savedStores.filter(id => SUPERMARKETS[id])
+      : Object.keys(SUPERMARKETS);
+
+    AppState.selectedBranches = JSON.parse(localStorage.getItem(BRANCHES_KEY) || '{}') || {};
   } catch (e) {
     console.error('Error cargando estado local:', e);
+    if (AppState.enabledStores.length === 0) AppState.enabledStores = Object.keys(SUPERMARKETS);
   }
 }
 
@@ -77,6 +147,8 @@ function saveState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(AppState.shoppingList));
     localStorage.setItem(CHECKED_KEY, JSON.stringify(AppState.checkedItems));
+    localStorage.setItem(STORES_KEY, JSON.stringify(AppState.enabledStores));
+    localStorage.setItem(BRANCHES_KEY, JSON.stringify(AppState.selectedBranches));
   } catch (e) {
     console.error('Error guardando estado local:', e);
   }
@@ -154,6 +226,22 @@ function setupEventListeners() {
     });
   }
 
+  // Seleccionar / limitar todas las tiendas de golpe
+  const toggleAllBtn = document.getElementById('btn-toggle-all-stores');
+  if (toggleAllBtn) {
+    toggleAllBtn.addEventListener('click', () => {
+      const allIds = Object.keys(SUPERMARKETS);
+      AppState.enabledStores = AppState.enabledStores.length === allIds.length
+        ? [allIds[0]]
+        : allIds;
+      saveState();
+      renderStoreSelector();
+      renderOptimizationResults();
+      renderSupermarketMode();
+      renderCatalog();
+    });
+  }
+
   // Compartir por WhatsApp
   const btnShareWhatsapp = document.getElementById('btn-share-whatsapp');
   if (btnShareWhatsapp) {
@@ -181,9 +269,138 @@ export function switchTab(tabId) {
   }
 }
 
+// --- TIENDAS Y SUCURSALES ---
+
+/** Sucursal elegida para una tienda (la primera por defecto). */
+function getSelectedBranch(store) {
+  const idx = AppState.selectedBranches[store.id] ?? 0;
+  return store.branchesQro[idx] || store.branchesQro[0] || { name: 'Querétaro', zone: 'Área metropolitana' };
+}
+
+/** Opciones de optimización derivadas del estado actual. */
+function optimizationOptions() {
+  return {
+    priceTable: AppState.priceTable,
+    enabledStores: AppState.enabledStores
+  };
+}
+
+function renderStoreSelector() {
+  const container = document.getElementById('store-selector-chips');
+  if (!container) return;
+
+  container.innerHTML = Object.values(SUPERMARKETS).map(store => {
+    const on = AppState.enabledStores.includes(store.id);
+    const branch = getSelectedBranch(store);
+    const branchIdx = AppState.selectedBranches[store.id] ?? 0;
+
+    return `
+      <div class="store-toggle ${on ? 'is-on' : 'is-off'}" style="--store-color: ${store.color}">
+        <label class="store-toggle-main">
+          <input type="checkbox" class="store-toggle-check" data-store="${store.id}" ${on ? 'checked' : ''}>
+          <span class="store-toggle-name">${store.logoText}</span>
+        </label>
+        <select class="branch-select" data-store="${store.id}" ${on ? '' : 'disabled'} title="Sucursal de ${store.name}">
+          ${store.branchesQro.map((b, i) => `
+            <option value="${i}" ${i === branchIdx ? 'selected' : ''}>${b.name}</option>
+          `).join('')}
+        </select>
+        <span class="store-toggle-zone">📍 ${branch.zone}</span>
+      </div>
+    `;
+  }).join('');
+
+  container.querySelectorAll('.store-toggle-check').forEach(chk => {
+    chk.addEventListener('change', () => {
+      const id = chk.dataset.store;
+      if (chk.checked) {
+        if (!AppState.enabledStores.includes(id)) AppState.enabledStores.push(id);
+      } else {
+        // Siempre tiene que quedar al menos una tienda con la que comparar.
+        if (AppState.enabledStores.length === 1) {
+          showToast('⚠️ Deja al menos una tienda seleccionada.');
+          chk.checked = true;
+          return;
+        }
+        AppState.enabledStores = AppState.enabledStores.filter(s => s !== id);
+      }
+      saveState();
+      renderStoreSelector();
+      renderOptimizationResults();
+      renderSupermarketMode();
+      renderCatalog();
+    });
+  });
+
+  container.querySelectorAll('.branch-select').forEach(sel => {
+    sel.addEventListener('change', () => {
+      AppState.selectedBranches[sel.dataset.store] = parseInt(sel.value, 10) || 0;
+      saveState();
+      renderStoreSelector();
+      renderOptimizationResults();
+      renderSupermarketMode();
+    });
+  });
+
+  const toggleAllBtn = document.getElementById('btn-toggle-all-stores');
+  if (toggleAllBtn) {
+    const allOn = AppState.enabledStores.length === Object.keys(SUPERMARKETS).length;
+    toggleAllBtn.textContent = allOn ? 'Quitar todas menos una' : 'Seleccionar todas';
+  }
+}
+
+// --- AVISOS SOBRE LA CALIDAD DE LOS DATOS ---
+function renderDataWarnings(opt) {
+  const box = document.getElementById('data-warnings');
+  if (!box) return;
+
+  const table = AppState.priceTable;
+  const warnings = [];
+
+  if (!table || table.isEmpty) {
+    warnings.push({
+      level: 'error',
+      text: 'No se pudieron cargar los precios (<code>data/prices.json</code>). Revisa tu conexión o vuelve a abrir la app.'
+    });
+  } else {
+    if (table.origin === 'cache') {
+      warnings.push({ level: 'info', text: 'Estás viendo la última copia local de los precios porque no hubo conexión.' });
+    }
+    if (table.isStale()) {
+      warnings.push({
+        level: 'warn',
+        text: `Los precios se actualizaron ${table.freshnessLabel()}. Tómalos como referencia, no como precio de caja.`
+      });
+    }
+  }
+
+  if (opt && opt.unpricedItems && opt.unpricedItems.length > 0) {
+    const nombres = opt.unpricedItems.map(i => i.name).join(', ');
+    warnings.push({
+      level: 'warn',
+      text: `Sin precio en las tiendas seleccionadas (no entran al total): <strong>${nombres}</strong>.`
+    });
+  }
+
+  if (opt && opt.anyStoreCoversAll === false) {
+    warnings.push({
+      level: 'info',
+      text: 'Ninguna tienda seleccionada tiene toda tu canasta, así que la comparación "1 sola tienda" es parcial.'
+    });
+  }
+
+  box.innerHTML = warnings.map(w => `
+    <div class="warning-strip is-${w.level}">
+      <span>${w.level === 'error' ? '⛔' : w.level === 'warn' ? '⚠️' : 'ℹ️'}</span>
+      <p>${w.text}</p>
+    </div>
+  `).join('');
+}
+
 // --- RENDERIZACIÓN GLOBAL ---
 function renderAll() {
   updateCartBadge();
+  renderStoreSelector();
   renderShoppingListEditor();
   renderOptimizationResults();
   renderCatalog();
@@ -315,8 +532,25 @@ function renderOptimizationResults() {
     return;
   }
 
-  const opt = calculateOptimizations(AppState.shoppingList);
+  const opt = calculateOptimizations(AppState.shoppingList, optimizationOptions());
   if (!opt) return;
+
+  renderDataWarnings(opt);
+
+  // Sin precios utilizables no se puede mostrar un total: se explica en vez de inventarlo.
+  if (opt.error) {
+    const msg = opt.error === 'no-stores'
+      ? 'No hay supermercados seleccionados. Elige al menos uno arriba para comparar.'
+      : 'Ninguno de los productos de tu canasta tiene precio en las tiendas seleccionadas.';
+    container.innerHTML = `
+      <div class="empty-state-card">
+        <div class="empty-icon">🤷</div>
+        <h3>No se puede calcular la ruta</h3>
+        <p>${msg}</p>
+      </div>
+    `;
+    return;
+  }
 
   // Determinar qué conjunto de tiendas mostrar según la estrategia seleccionada
   let activeStoreGroups = [];
@@ -337,14 +571,13 @@ function renderOptimizationResults() {
     activeStoreGroups = [{
       store: bestStore.store,
       subtotal: bestStore.total,
-      items: bestStore.items.map(it => ({
-        ...it,
-        unitPrice: it.prices[bestStore.store.id],
-        subtotal: it.prices[bestStore.store.id] * it.quantity
-      }))
+      items: bestStore.items,
+      missingItems: bestStore.missingItems
     }];
     currentTotal = bestStore.total;
-    strategyBadge = `🏪 Todo en 1 Tienda (${bestStore.store.name})`;
+    strategyBadge = bestStore.hasFullCoverage
+      ? `🏪 Todo en 1 Tienda (${bestStore.store.name})`
+      : `🏪 1 Tienda (${bestStore.store.name}) · le faltan ${bestStore.missingItems.length}`;
   }
 
   // Gráfico de barras comparativas
@@ -368,7 +601,9 @@ function renderOptimizationResults() {
           <div class="progress-fill" style="width: ${widthPct}%; background: ${s.store.color}"></div>
         </div>
         <div class="store-diff-label">
-          ${isBest ? '⭐ Mejor opción individual' : `+ $${diffVsOptimized.toFixed(2)} vs ruta óptima`}
+          ${s.hasFullCoverage
+            ? (isBest ? '⭐ Mejor opción individual' : `+ $${diffVsOptimized.toFixed(2)} vs ruta óptima`)
+            : `⚠️ No tiene ${s.missingItems.length} de tus productos (total parcial)`}
         </div>
       </div>
     `;
@@ -377,7 +612,7 @@ function renderOptimizationResults() {
   // Generar tarjetas por tienda de la estrategia actual
   const storeCardsHtml = activeStoreGroups.map(group => {
     const store = group.store;
-    const branch = store.branchesQro[0] || { name: 'Querétaro', zone: 'Área metropolitana' };
+    const branch = getSelectedBranch(store);
 
     const itemsHtml = group.items.map(it => {
       const formattedQty = it.unit === 'kg' ? `${it.quantity} kg` : `${it.quantity} ${it.unit}`;
@@ -488,8 +723,17 @@ function renderSupermarketMode() {
     return;
   }
 
-  const opt = calculateOptimizations(AppState.shoppingList);
-  if (!opt) return;
+  const opt = calculateOptimizations(AppState.shoppingList, optimizationOptions());
+  if (!opt || opt.error) {
+    container.innerHTML = `
+      <div class="empty-state-card">
+        <div class="empty-icon">🤷</div>
+        <h3>No hay ruta que recorrer</h3>
+        <p>Sin precios en las tiendas seleccionadas no se puede armar el checklist.</p>
+      </div>
+    `;
+    return;
+  }
 
   let activeStoreGroups = [];
   if (AppState.strategy === 'split') {
@@ -500,11 +744,7 @@ function renderSupermarketMode() {
     activeStoreGroups = [{
       store: opt.bestSingleStore.store,
       subtotal: opt.bestSingleStore.total,
-      items: opt.bestSingleStore.items.map(it => ({
-        ...it,
-        unitPrice: it.prices[opt.bestSingleStore.store.id],
-        subtotal: it.prices[opt.bestSingleStore.store.id] * it.quantity
-      }))
+      items: opt.bestSingleStore.items
     }];
   }
 
@@ -516,10 +756,9 @@ function renderSupermarketMode() {
   const storeFilterButtons = `
     <div class="store-filter-bar">
       <button class="store-filter-btn ${AppState.activeStoreFilter === 'all' ? 'active' : ''}" data-store="all">
-        Ver Todas (${opt.itemsCount})
+        Ver Todas (${opt.pricedCount})
       </button>
-      ${Object.keys(SUPERMARKETS).map(sid => {
-        const hasItems = activeStoreGroups.some(g => g.store.id === sid);
+      ${AppState.enabledStores.map(sid => {
         const store = SUPERMARKETS[sid];
         return `
           <button class="store-filter-btn ${AppState.activeStoreFilter === sid ? 'active' : ''}" data-store="${sid}">
@@ -559,7 +798,7 @@ function renderSupermarketMode() {
         <div class="checklist-store-header">
           <div>
             <h4 style="color: ${store.color}">${store.logoText}</h4>
-            <small>📍 ${store.branchesQro[0]?.name} - ${store.branchesQro[0]?.zone}</small>
+            <small>📍 ${getSelectedBranch(store).name} - ${getSelectedBranch(store).zone}</small>
           </div>
           <div class="checklist-progress-badge">
             ${completedCount} / ${items.length} listos (${progressPct}%)
@@ -663,9 +902,28 @@ function renderCatalog() {
     const existingInCart = AppState.shoppingList.find(it => it.catalogId === prod.id);
     const inCartQty = existingInCart ? existingInCart.quantity : 0;
 
-    // Encontrar mejor precio
-    const storePrices = Object.entries(prod.prices);
-    storePrices.sort((a, b) => a[1] - b[1]);
+    // Precios de este producto, limitados a las tiendas que el usuario visitaría
+    const allPrices = AppState.priceTable ? AppState.priceTable.getPrices(prod.ean) : {};
+    const storePrices = Object.entries(allPrices)
+      .filter(([sid]) => AppState.enabledStores.includes(sid))
+      .sort((a, b) => a[1] - b[1]);
+
+    if (storePrices.length === 0) {
+      return `
+        <div class="catalog-card is-unpriced">
+          <div class="catalog-card-header">
+            <span class="cat-tag">${CATEGORIES.find(c => c.id === prod.category)?.icon || '🛒'} ${prod.unit}</span>
+            <span class="best-price-badge no-price">Sin precio</span>
+          </div>
+          <h4 class="product-title">${prod.name}</h4>
+          <p class="no-price-note">No hay precio conocido en las tiendas que seleccionaste.</p>
+          <div class="catalog-card-actions">
+            <button class="btn-add-product" data-id="${prod.id}">+ Agregar de todos modos</button>
+          </div>
+        </div>
+      `;
+    }
+
     const bestPrice = storePrices[0];
     const bestStore = SUPERMARKETS[bestPrice[0]];
 
@@ -813,15 +1071,18 @@ function shareListToWhatsApp() {
     return;
   }
 
-  const opt = calculateOptimizations(AppState.shoppingList);
-  if (!opt) return;
+  const opt = calculateOptimizations(AppState.shoppingList, optimizationOptions());
+  if (!opt || opt.error) {
+    alert('Todavía no hay una ruta que compartir: no hay precios para tu canasta.');
+    return;
+  }
 
   let msg = `🛒 *Mi Ruta de Supermercados en Querétaro - SuperPrecios QRO*\n\n`;
   msg += `💰 *Total Optimizado:* $${opt.multiStore.total.toFixed(2)} MXN\n`;
   msg += `🎉 *Ahorro Estimado:* $${opt.savings.maxSavingsVsWorst.toFixed(2)} MXN (${opt.savings.savingsPercentage}%)\n\n`;
 
   for (const group of opt.multiStore.storeGroups) {
-    msg += `📍 *${group.store.name}* (Subtotal: $${group.subtotal.toFixed(2)}):\n`;
+    msg += `📍 *${group.store.name}* — ${getSelectedBranch(group.store).name} (Subtotal: $${group.subtotal.toFixed(2)}):\n`;
     for (const it of group.items) {
       const q = it.unit === 'kg' ? `${it.quantity} kg` : `${it.quantity} ${it.unit}`;
       msg += `  • ${it.name} (${q}) -> $${it.subtotal.toFixed(2)}\n`;
@@ -829,6 +1090,12 @@ function shareListToWhatsApp() {
     msg += `\n`;
   }
 
+  if (opt.unpricedItems.length > 0) {
+    msg += `⚠️ *Sin precio (revisar en tienda):* ${opt.unpricedItems.map(i => i.name).join(', ')}\n\n`;
+  }
+
+  const table = AppState.priceTable;
+  msg += `_Precios de referencia actualizados ${table ? table.freshnessLabel() : 'sin fecha'}._\n`;
   msg += `Generado con SuperPrecios QRO 🥑`;
 
   const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
