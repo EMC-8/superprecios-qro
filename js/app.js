@@ -27,7 +27,7 @@ function setup() {
   input.addEventListener('input', () => { state.query = input.value.trim().toLowerCase(); renderFinder(); });
   document.getElementById('clear-search').addEventListener('click', () => { input.value = ''; state.query = ''; renderFinder(); input.focus(); });
   document.getElementById('quick-add').addEventListener('click', () => { const text = document.getElementById('quick-list-text').value.trim(); if (!text) return; merge(parseShoppingListText(text)); document.getElementById('quick-list-text').value = ''; state.tab = 'list'; render(); toast('Lista agregada.'); });
-  document.getElementById('btn-share').addEventListener('click', shareBasket);
+  document.getElementById('btn-share').addEventListener('click', copyBasket);
 }
 function render() {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === `tab-${state.tab}`));
@@ -69,7 +69,7 @@ function renderGuide() {
   if (!state.list.length) { host.innerHTML = '<div class="empty-state-card">Primero crea tu canasta.</div>'; return; }
   if (!state.guide || !SUPERMARKETS[state.guide.storeId]) { host.innerHTML = '<div class="empty-state-card"><h3>Compra guiada</h3><p>Elige una tienda desde Comparar. Conservaremos tu avance localmente.</p></div>'; return; }
   const store = SUPERMARKETS[state.guide.storeId], i = Math.min(state.guide.index, state.list.length - 1), item = state.list[i];
-  const doneCount = Object.keys(state.guide.done).length, term = `${item.name} ${item.unit === 'kg' ? '' : item.unit}`.trim(), hasEan = /^\d{8,14}$/.test(item.ean || '');
+  const doneCount = Object.keys(state.guide.done).length, term = item.name, hasEan = /^\d{8,14}$/.test(item.ean || '');
   host.innerHTML = `<section class="guide-card"><span class="checkout-eyebrow">Compra guiada · sitio oficial</span><h2>${esc(store.name)}</h2><p>Las tiendas no ofrecen un carrito universal. Este flujo conserva tu lista y evita reescribirla; inicio de sesión, sucursal, disponibilidad, sustituciones, domicilio y pago ocurren solo en el dominio oficial.</p><div class="guide-progress" aria-label="Progreso"><span style="width:${Math.round(doneCount / state.list.length * 100)}%"></span></div><p><strong>${doneCount}/${state.list.length} listos</strong> · Producto ${i + 1} de ${state.list.length}</p><article class="guide-product"><h3>${esc(item.name)}</h3><p>${esc(quantity(item))}</p><label>Término recomendado<input readonly value="${esc(term)}" aria-label="Término de búsqueda recomendado"></label><div class="guide-actions"><button class="primary-btn" data-copy-term>Copiar término</button><a class="secondary-btn" href="${getOfficialProductUrl(store, item)}" target="_blank" rel="noopener noreferrer">Abrir búsqueda oficial ↗</a>${hasEan ? `<button class="secondary-btn" data-copy-ean>Copiar EAN</button>` : '<span class="hint">Sin EAN válido: usa el término legible.</span>'}</div></article><div class="guide-footer"><button class="secondary-btn" data-copy-all>Copiar lista completa</button><button class="secondary-btn" data-web-share>Compartir</button><button class="primary-btn" data-next>${state.guide.done[i] ? 'Avanzar al siguiente' : 'Marcar listo y avanzar'}</button></div><a class="official-link" href="${getOfficialStoreUrl(store)}" target="_blank" rel="noopener noreferrer">Ir al sitio oficial de ${esc(store.shortName)} ↗</a></section>`;
   host.querySelector('[data-copy-term]').addEventListener('click', () => copy(term));
   host.querySelector('[data-copy-ean]')?.addEventListener('click', () => copy(item.ean));
@@ -78,5 +78,6 @@ function renderGuide() {
   host.querySelector('[data-next]').addEventListener('click', () => { state.guide.done[i] = true; state.guide.index = Math.min(i + 1, state.list.length - 1); save(); renderGuide(); });
 }
 async function copy(value) { try { await copyText(value); toast('Copiado.'); } catch { toast('No se pudo copiar; selecciónalo manualmente.'); } }
-async function shareBasket() { const text = `Canasta SuperPrecios QRO\n${state.list.map(item => `- ${quantity(item)} ${item.name}`).join('\n')}`; if (navigator.share) { try { await navigator.share({ title: 'Mi canasta', text, url: buildShareUrl(state.list) }); } catch {} } else copy(buildShareUrl(state.list)); }
+function basketText() { return `Canasta SuperPrecios QRO\n${state.list.map(item => `- ${quantity(item)} ${item.name}${/^\d{8,14}$/.test(item.ean || '') ? ` | EAN ${item.ean}` : ''}`).join('\n')}`; }
+function copyBasket() { copy(basketText()); }
 function toast(message) { let node = document.getElementById('app-toast'); if (!node) { node = document.createElement('div'); node.id = 'app-toast'; node.className = 'app-toast'; document.body.append(node); } node.textContent = message; node.classList.add('show'); setTimeout(() => node.classList.remove('show'), 2200); }

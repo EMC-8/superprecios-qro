@@ -21,7 +21,7 @@
 2. **✍️ Parser Inteligente de Texto Libre**:
    - Permite escribir o pegar listas de compras en lenguaje natural (ej. `2kg pechuga de pollo, 1kg jitomate, 2 leche lala, 1 huevo san juan, 1 aceite nutrioli, 1 pan bimbo, 1 papel de bano`) reconociendo automáticamente cantidades, unidades y marcas.
 3. **↗ Compra guiada en la tienda oficial**:
-   - Un CTA por cadena abre un flujo local persistente con la canasta completa, progreso, copia del término legible, EAN válido cuando exista y búsqueda oficial por producto.
+   - Un CTA por cadena abre un flujo local persistente con la canasta completa, progreso, copia del término legible, EAN válido cuando exista y búsqueda oficial por producto. La lista legible copiada incluye el EAN cuando existe.
    - Permite copiar o compartir la lista completa. No crea ni promete un carrito remoto precargado.
 4. **📲 PWA Completa & Offline**:
    - Service Worker con caché de app shell y datos locales guardados en el navegador.
@@ -89,9 +89,9 @@ El repositorio incluye un workflow que publica desde la rama `main` mediante Git
 La sección **Comparar** muestra las seis tiendas con la misma canasta. Para cada supermercado permite:
 
 - abrir un modo guiado y su sitio oficial;
-- copiar la lista canónica completa;
+- copiar la lista canónica completa, con EAN cuando exista;
 - copiar el término de búsqueda recomendado o EAN válido y abrir la búsqueda oficial de cada producto;
-- compartir la misma canasta por URL.
+- compartir la misma canasta por URL. La compra y el pago ocurren exclusivamente en la tienda oficial.
 
 No se crea un carrito remoto automáticamente: las cadenas no ofrecen un formato universal. La disponibilidad, pickup, entrega, sustituciones y cargos dependen de la cuenta, sucursal e inventario del comprador. El inicio de sesión, dirección y pago ocurren exclusivamente con cada supermercado.
 

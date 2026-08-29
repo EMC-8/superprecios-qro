@@ -1,8 +1,10 @@
 /** Official retailer handoff helpers. Retailer carts require approved integrations. */
 import { PRODUCTS_CATALOG } from './data.js';
 
-export const getOfficialStoreUrl = store => store.searchUrl ? store.searchUrl('') : '';
+export const getOfficialStoreUrl = store => store.homeUrl || (store.searchUrl ? store.searchUrl('') : '');
 export const getOfficialProductUrl = (store, item) => store.searchUrl ? store.searchUrl(item.name) : getOfficialStoreUrl(store);
+
+const validEan = item => /^\d{8,14}$/.test(String(item.ean || ''));
 
 export function formatStoreList(store, items, fulfillment) {
   const mode = fulfillment === 'pickup' ? 'Recoger en tienda' : 'Entrega a domicilio';
@@ -10,7 +12,7 @@ export function formatStoreList(store, items, fulfillment) {
     `Lista para ${store.name}`,
     `Modalidad deseada: ${mode}`,
     '',
-    ...items.map(item => `- ${item.unit === 'kg' ? `${item.quantity} kg` : `${item.quantity} ${item.unit}`} ${item.name}`),
+    ...items.map(item => `- ${item.unit === 'kg' ? `${item.quantity} kg` : `${item.quantity} ${item.unit}`} ${item.name}${validEan(item) ? ` | EAN ${item.ean}` : ''}`),
     '',
     'Confirma existencias, cobertura y costo final directamente con el supermercado.'
   ].join('\n');
