@@ -10,6 +10,7 @@
 
 > **Estado:** la app funciona completa de punta a punta, hay esquema de base de datos, pipeline de ingesta de precios y despliegue configurado.
 >
+> - 🤝 **¿Vas a retomar el proyecto?** Empieza por [`CONTINUIDAD.md`](CONTINUIDAD.md)
 > - 🚀 **Desplegar:** [`docs/despliegue.md`](docs/despliegue.md)
 > - 🔌 **Precios y scraping:** [`docs/scraping.md`](docs/scraping.md)
 >
