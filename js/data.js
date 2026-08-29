@@ -30,7 +30,7 @@ export const SUPERMARKETS = {
     accentColor: '#ff9933',
     logoText: '🟠 Chedraui',
     logoIcon: '🏪',
-    searchUrl: (query) => `https://www.chedraui.com.mx/search?q=${encodeURIComponent(query)}`,
+    searchUrl: (query) => `https://www.chedraui.com.mx/${encodeURIComponent(query)}?map=ft`,
     branchesQro: [
       { name: 'Chedraui Centro Sur', zone: 'Centro Sur / Bernardo Quintana' },
       { name: 'Chedraui Selecto Juriquilla', zone: 'Antea / Juriquilla' },
@@ -76,7 +76,9 @@ export const SUPERMARKETS = {
     accentColor: '#2b7a33',
     logoText: '🟡 La Comer',
     logoIcon: '🍊',
-    searchUrl: () => `https://www.lacomer.com.mx/lacomer/`,
+    // La Comer currently exposes its official storefront but no stable public search-results route.
+    // Keep the readable query in the official entry URL; the guided flow also copies the term.
+    searchUrl: (query) => `https://www.lacomer.com.mx/lacomer/?q=${encodeURIComponent(query)}`,
     branchesQro: [
       { name: 'La Comer El Refugio', zone: 'Fray Junípero Serra / El Refugio' },
       { name: 'La Comer Juriquilla', zone: 'Av. Juriquilla Santa Fe' },

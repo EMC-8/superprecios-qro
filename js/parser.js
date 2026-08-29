@@ -73,13 +73,13 @@ export function parseLine(line) {
       unit: matchedProduct.unit || unit,
       quantity: quantity,
       prices: matchedProduct.prices,
+      ean: matchedProduct.ean || null,
       rawInput: originalText,
       isCustom: false
     };
   }
 
   // Si no se encuentra en el catálogo, se crea un producto genérico
-  const fallbackPrices = estimatePricesForUnknown(searchTerm);
   return {
     id: 'custom-' + Math.random().toString(36).substr(2, 9),
     catalogId: null,
@@ -87,7 +87,9 @@ export function parseLine(line) {
     category: 'despensa',
     unit: unit,
     quantity: quantity,
-    prices: fallbackPrices,
+    // Unknown products remain in the canonical basket but have no invented price.
+    prices: {},
+    ean: null,
     rawInput: originalText,
     isCustom: true
   };
@@ -169,19 +171,6 @@ export function parseShoppingListText(rawText) {
   }
 
   return items;
-}
-
-function estimatePricesForUnknown(term) {
-  // Precios referenciales genéricos para artículos no catalogados
-  const base = 35.0;
-  return {
-    aurrera: Math.round(base * 0.94 * 10) / 10,
-    chedraui: Math.round(base * 0.96 * 10) / 10,
-    walmart: Math.round(base * 1.05 * 10) / 10,
-    soriana: Math.round(base * 1.02 * 10) / 10,
-    lacomer: Math.round(base * 1.15 * 10) / 10,
-    heb: Math.round(base * 1.08 * 10) / 10
-  };
 }
 
 function capitalize(str) {

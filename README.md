@@ -14,16 +14,17 @@
 
 ## 🌟 Características Principales
 
-1. **⚡ Motor de Optimización de Rutas de Compra**:
-   - **🌟 Menor total estimado (Compra Dividida)**: Desglosa productos según las referencias locales disponibles.
-   - **⚖️ Ruta Práctica (Máximo 2 Tiendas)**: Calcula una combinación estimada para reducir visitas.
-   - **🏪 1 Sola Tienda**: Compara el total estimado de la canasta en cada cadena.
+1. **⚖️ Comparación canónica y honesta**:
+   - Las seis cadenas reciben exactamente la misma lista y cantidades.
+   - Una referencia faltante se conserva como **No verificado / Buscar en tienda oficial**; nunca se convierte en $0.
+   - Los totales son datos locales de demo estimados y solo se muestran como comparables cuando cubren toda la canasta.
 2. **✍️ Parser Inteligente de Texto Libre**:
    - Permite escribir o pegar listas de compras en lenguaje natural (ej. `2kg pechuga de pollo, 1kg jitomate, 2 leche lala, 1 huevo san juan, 1 aceite nutrioli, 1 pan bimbo, 1 papel de bano`) reconociendo automáticamente cantidades, unidades y marcas.
-3. **🛒 Modo Supermercado (Checklist Interactivo)**:
-   - Lista interactiva filtrada por tienda con casillas para ir tachando productos en tiempo real en los pasillos físicos de la tienda.
+3. **↗ Compra guiada en la tienda oficial**:
+   - Un CTA por cadena abre un flujo local persistente con la canasta completa, progreso, copia del término legible, EAN válido cuando exista y búsqueda oficial por producto.
+   - Permite copiar o compartir la lista completa. No crea ni promete un carrito remoto precargado.
 4. **📲 PWA Completa & Offline**:
-   - Service Worker con estrategia de caché *Stale-While-Revalidate*. Funciona sin conexión a internet dentro del supermercado.
+   - Service Worker con caché de app shell y datos locales guardados en el navegador.
    - Instalable como app nativa en Android, iOS y Desktop.
    - Botón para compartir la ruta y desglose por WhatsApp.
 5. **↗ Compra en canales oficiales**:
@@ -85,14 +86,14 @@ El repositorio incluye un workflow que publica desde la rama `main` mediante Git
 
 ## Flujo de compra oficial
 
-La pestaña **Comprar** separa la canasta según la estrategia elegida. Para cada supermercado permite:
+La sección **Comparar** muestra las seis tiendas con la misma canasta. Para cada supermercado permite:
 
-- abrir su sitio oficial;
-- copiar la lista asignada;
-- abrir la búsqueda oficial de cada producto;
+- abrir un modo guiado y su sitio oficial;
+- copiar la lista canónica completa;
+- copiar el término de búsqueda recomendado o EAN válido y abrir la búsqueda oficial de cada producto;
 - compartir la misma canasta por URL.
 
-No se crea un carrito remoto automáticamente: la app ofrece una lista preparada, un enlace a cada tienda y búsquedas oficiales por producto. La disponibilidad, pickup, entrega, sustituciones y cargos dependen de la cuenta, sucursal e inventario del comprador. El inicio de sesión, dirección y pago ocurren exclusivamente con cada supermercado.
+No se crea un carrito remoto automáticamente: las cadenas no ofrecen un formato universal. La disponibilidad, pickup, entrega, sustituciones y cargos dependen de la cuenta, sucursal e inventario del comprador. El inicio de sesión, dirección y pago ocurren exclusivamente con cada supermercado.
 
 ---
 

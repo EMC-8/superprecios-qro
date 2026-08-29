@@ -21,7 +21,7 @@ export function buildShareUrl(items) {
     catalogId: item.catalogId || null,
     name: String(item.name || '').slice(0, 120), category: String(item.category || 'despensa').slice(0, 50),
     unit: String(item.unit || 'pz').slice(0, 20), quantity: Number(item.quantity) || 1,
-    prices: item.prices || {}, isCustom: Boolean(item.isCustom)
+    prices: item.prices || {}, ean: item.ean || null, isCustom: Boolean(item.isCustom)
   }));
   const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
   return `${window.location.href.split('#')[0]}#cart=${encoded}`;
@@ -50,8 +50,8 @@ function toShoppingItem(item) {
   const quantity = Number(item.quantity);
   if (!Number.isFinite(quantity) || quantity <= 0 || quantity > 999) return null;
   const catalog = PRODUCTS_CATALOG.find(product => product.id === item.catalogId);
-  if (catalog) return { id: catalog.id, catalogId: catalog.id, name: catalog.name, category: catalog.category, unit: catalog.unit, quantity, prices: catalog.prices, rawInput: catalog.name, isCustom: false };
+  if (catalog) return { id: catalog.id, catalogId: catalog.id, name: catalog.name, category: catalog.category, unit: catalog.unit, quantity, prices: catalog.prices, ean: catalog.ean || null, rawInput: catalog.name, isCustom: false };
   if (!item.isCustom || !item.name || typeof item.prices !== 'object') return null;
   const prices = Object.fromEntries(Object.entries(item.prices).filter(([, price]) => Number.isFinite(Number(price)) && Number(price) >= 0 && Number(price) < 100000));
-  return { id: `shared-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}`, catalogId: null, name: String(item.name).slice(0, 120), category: String(item.category || 'despensa').slice(0, 50), unit: String(item.unit || 'pz').slice(0, 20), quantity, prices, rawInput: String(item.name).slice(0, 120), isCustom: true };
+  return { id: `shared-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}`, catalogId: null, name: String(item.name).slice(0, 120), category: String(item.category || 'despensa').slice(0, 50), unit: String(item.unit || 'pz').slice(0, 20), quantity, prices, ean: /^\d{8,14}$/.test(item.ean || '') ? item.ean : null, rawInput: String(item.name).slice(0, 120), isCustom: true };
 }
