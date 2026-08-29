@@ -6,6 +6,7 @@ import { SUPERMARKETS, CATEGORIES, PRODUCTS_CATALOG, SAMPLE_LISTS } from './data
 import { parseShoppingListText, parseLine } from './parser.js';
 import { calculateOptimizations } from './optimizer.js';
 import { initPWA, promptInstallApp } from './pwa.js';
+import { buildShareUrl, copyText, formatStoreList, getOfficialProductUrl, getOfficialStoreUrl, readSharedCart } from './checkout.js';
 
 // --- ESTADO GLOBAL DE LA APP ---
 const AppState = {
@@ -15,7 +16,8 @@ const AppState = {
   checkedItems: {},        // { 'item-id-store-id': true }
   searchQuery: '',
   selectedCategory: 'all',
-  activeStoreFilter: 'all'
+  activeStoreFilter: 'all',
+  fulfillment: 'delivery'
 };
 
 const STORAGE_KEY = 'superprecios_qro_list_v1';
@@ -24,6 +26,12 @@ const CHECKED_KEY = 'superprecios_qro_checked_v1';
 // --- INICIALIZACIÓN ---
 document.addEventListener('DOMContentLoaded', () => {
   loadSavedState();
+  const sharedCart = readSharedCart();
+  if (sharedCart) {
+    AppState.shoppingList = sharedCart;
+    AppState.checkedItems = {};
+    saveState();
+  }
   initPWA((installAvailable) => {
     const installBtn = document.getElementById('btn-install-app');
     if (installBtn) {
@@ -161,6 +169,8 @@ export function switchTab(tabId) {
     renderSupermarketMode();
   } else if (tabId === 'optimizer') {
     renderOptimizationResults();
+  } else if (tabId === 'checkout') {
+    renderCheckout();
   }
 }
 
@@ -171,6 +181,7 @@ function renderAll() {
   renderOptimizationResults();
   renderCatalog();
   renderSupermarketMode();
+  renderCheckout();
 }
 
 function updateCartBadge() {
@@ -390,7 +401,7 @@ function renderOptimizationResults() {
         </div>
         <div class="store-card-footer">
           <span>${group.items.length} ${group.items.length === 1 ? 'producto' : 'productos'} recomendados aquí</span>
-          <button class="btn-goto-store" onclick="window.AppState.selectStoreMode('${store.id}')">Ir a comprar ➔</button>
+          <button class="btn-goto-store" data-open-checkout="${store.id}">Preparar compra oficial ↗</button>
         </div>
       </div>
     `;
@@ -449,6 +460,82 @@ function renderOptimizationResults() {
       ${storeCardsHtml}
     </div>
   `;
+
+  container.querySelectorAll('[data-open-checkout]').forEach(button => {
+    button.addEventListener('click', () => {
+      AppState.activeStoreFilter = button.dataset.openCheckout;
+      switchTab('checkout');
+    });
+  });
+}
+
+function getActiveStoreGroups() {
+  const opt = calculateOptimizations(AppState.shoppingList);
+  if (!opt) return [];
+  if (AppState.strategy === 'split') return opt.multiStore.storeGroups;
+  if (AppState.strategy === 'two-stores' && opt.twoStoresCombo) return opt.twoStoresCombo.storeGroups;
+
+  const bestStore = opt.bestSingleStore;
+  return [{
+    store: bestStore.store,
+    subtotal: bestStore.total,
+    items: bestStore.items.map(item => ({
+      ...item,
+      unitPrice: item.prices[bestStore.store.id],
+      subtotal: item.prices[bestStore.store.id] * item.quantity
+    }))
+  }];
+}
+
+function renderCheckout() {
+  const container = document.getElementById('checkout-container');
+  if (!container) return;
+  if (!AppState.shoppingList.length) {
+    container.innerHTML = '<div class="empty-state-card"><div class="empty-icon">🛒</div><h3>Agrega productos antes de comprar</h3><p>Prepara tu canasta y te daremos enlaces oficiales por supermercado.</p><button class="primary-btn" data-open-list>Crear lista</button></div>';
+    container.querySelector('[data-open-list]').addEventListener('click', () => switchTab('list'));
+    return;
+  }
+
+  let groups = getActiveStoreGroups();
+  if (AppState.activeStoreFilter !== 'all') groups = groups.filter(group => group.store.id === AppState.activeStoreFilter);
+  if (!groups.length) groups = getActiveStoreGroups();
+  const fulfillmentLabel = AppState.fulfillment === 'pickup' ? 'Recoger en tienda' : 'Entrega a domicilio';
+
+  container.innerHTML = `
+    <div class="checkout-intro-card">
+      <div><span class="checkout-eyebrow">Compra en canales oficiales</span><h2>Termina tu pedido con cada supermercado</h2><p>Abre la tienda oficial, agrega los productos y confirma ahí existencias, cobertura y costo final.</p></div>
+      <div class="fulfillment-toggle" role="group" aria-label="Modalidad preferida">
+        <button class="${AppState.fulfillment === 'delivery' ? 'active' : ''}" data-fulfillment="delivery">Entrega</button>
+        <button class="${AppState.fulfillment === 'pickup' ? 'active' : ''}" data-fulfillment="pickup">Pickup</button>
+      </div>
+    </div>
+    <div class="checkout-notice">La modalidad es una preferencia. El supermercado confirma disponibilidad, mínimo de compra y cualquier costo al finalizar.</div>
+    <div class="checkout-grid">${groups.map(group => renderCheckoutStore(group, fulfillmentLabel)).join('')}</div>
+    <div class="checkout-share-row"><button class="secondary-btn" data-copy-share>Copiar enlace de esta canasta</button><span>Comparte la misma lista sin crear una cuenta.</span></div>`;
+
+  container.querySelectorAll('[data-fulfillment]').forEach(button => button.addEventListener('click', () => {
+    AppState.fulfillment = button.dataset.fulfillment;
+    renderCheckout();
+  }));
+  container.querySelectorAll('[data-copy-list]').forEach(button => button.addEventListener('click', async () => {
+    const group = groups.find(candidate => candidate.store.id === button.dataset.copyList);
+    if (!group) return;
+    try { await copyText(formatStoreList(group.store, group.items, AppState.fulfillment)); showToast(`Lista de ${group.store.shortName} copiada.`); }
+    catch { showToast('No se pudo copiar la lista. Intenta de nuevo.'); }
+  }));
+  container.querySelector('[data-copy-share]').addEventListener('click', async () => {
+    try { await copyText(buildShareUrl(AppState.shoppingList)); showToast('Enlace de canasta copiado.'); }
+    catch { showToast('No se pudo copiar el enlace. Intenta de nuevo.'); }
+  });
+}
+
+function renderCheckoutStore(group, fulfillmentLabel) {
+  const { store, items } = group;
+  const products = items.map(item => {
+    const quantity = item.unit === 'kg' ? `${item.quantity} kg` : `${item.quantity} ${item.unit}`;
+    return `<li><span>${escapeHtml(quantity)} ${escapeHtml(item.name)}</span><a href="${getOfficialProductUrl(store, item)}" target="_blank" rel="noopener noreferrer">Buscar ↗</a></li>`;
+  }).join('');
+  return `<article class="checkout-store-card" style="--store-color:${store.color}"><header><div><span class="store-name">${escapeHtml(store.logoText)}</span><h3>${escapeHtml(store.name)}</h3></div><strong>$${group.subtotal.toFixed(2)}</strong></header><p>${items.length} productos. Preferencia: ${fulfillmentLabel}.</p><div class="checkout-actions"><a class="primary-btn official-store-link" href="${getOfficialStoreUrl(store)}" target="_blank" rel="noopener noreferrer">Abrir tienda oficial ↗</a><button class="secondary-btn" data-copy-list="${store.id}">Copiar lista</button></div><ul class="checkout-products">${products}</ul></article>`;
 }
 
 // --- MODO SUPERMERCADO (CHECKLIST INTERACTIVO) ---
@@ -766,6 +853,12 @@ function mergeItemsIntoList(newItems) {
 }
 
 // --- UTILIDADES ---
+function escapeHtml(value) {
+  return String(value).replace(/[&<>'"]/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+  })[char]);
+}
+
 function getCategoryName(catId) {
   const cat = CATEGORIES.find(c => c.id === catId);
   return cat ? cat.name : 'Varios';

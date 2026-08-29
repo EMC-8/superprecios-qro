@@ -3,7 +3,7 @@
  * Soporte Offline y almacenamiento en caché de activos estáticos.
  */
 
-const CACHE_NAME = 'superprecios-qro-v3';
+const CACHE_NAME = 'superprecios-qro-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -15,8 +15,7 @@ const ASSETS = [
   './js/optimizer.js',
   './js/parser.js',
   './js/pwa.js',
-  './assets/icons/icon-192.png',
-  './assets/icons/icon-512.png',
+  './js/checkout.js',
   './assets/icons/icon.svg'
 ];
 

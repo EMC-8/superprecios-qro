@@ -100,6 +100,19 @@
     min-width: unset;
   }
 
+  .checkout-intro-card,
+  .checkout-share-row {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 16px;
+  }
+
+  .checkout-intro-card h2 { font-size: 23px; }
+  .checkout-grid { grid-template-columns: 1fr; }
+  .checkout-actions { flex-direction: column; }
+  .checkout-actions .primary-btn, .checkout-actions .secondary-btn { width: 100%; }
+
   .store-cards-grid {
     grid-template-columns: 1fr;
   }

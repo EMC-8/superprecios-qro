@@ -24,6 +24,9 @@
    - Service Worker con estrategia de caché *Stale-While-Revalidate*. Funciona sin conexión a internet dentro del supermercado.
    - Instalable como app nativa en Android, iOS y Desktop.
    - Botón para compartir la ruta y desglose por WhatsApp.
+5. **↗ Compra en canales oficiales**:
+   - Genera una lista por supermercado, enlaces oficiales de búsqueda por producto y un enlace compartible de la canasta.
+   - El usuario final confirma en el sitio del supermercado la cobertura, inventario, entrega o pickup y cualquier cargo aplicable.
 5. **🏷️ Catálogo con Códigos de Barras Oficiales (EAN-13)**:
    - Productos estandarizados con sus códigos GTIN/EAN-13 registrados ante GS1 México y enlaces de verificación.
 
@@ -45,6 +48,9 @@ superprecios-qro/
 │   ├── optimizer.js        # Motor matemático de cálculo y optimización
 │   ├── parser.js           # Parser de lenguaje natural para listas escritas
 │   └── pwa.js              # Inicialización de Service Worker y banner de instalación
+│   └── checkout.js          # Enlaces oficiales, lista copiable y canasta compartible
+├── .github/workflows/
+│   └── deploy-pages.yml     # Demo estática automática en GitHub Pages
 ├── assets/
 │   └── icons/
 │       └── icon.svg        # Ícono SVG PWA
@@ -67,6 +73,21 @@ Abre en tu navegador: `http://localhost:8080`
 ```bash
 npx serve .
 ```
+
+## Demo pública
+
+El repositorio publica la rama `main` en GitHub Pages mediante GitHub Actions. En GitHub, configura **Settings → Pages → Source: GitHub Actions** la primera vez. Cada push posterior actualizará el demo.
+
+## Flujo de compra oficial
+
+La pestaña **Comprar** separa la canasta según la estrategia elegida. Para cada supermercado permite:
+
+- abrir su sitio oficial;
+- copiar la lista asignada;
+- abrir la búsqueda oficial de cada producto;
+- compartir la misma canasta por URL.
+
+No se crea un carrito remoto automáticamente: Walmart, HEB, Chedraui, Soriana, La Comer y Bodega Aurrera no exponen una integración de carrito común y la disponibilidad, pickup, entrega y cargos dependen de la cuenta, código postal, sucursal e inventario del comprador. Esta separación evita presentar una promesa falsa al cliente.
 
 ---
 

@@ -181,7 +181,7 @@ body {
 /* Nav Tabs */
 .tabs-navigation {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 8px;
   background: rgba(15, 23, 42, 0.6);
   padding: 6px;
@@ -207,6 +207,88 @@ body {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
+
+/* Official retailer handoff */
+.checkout-intro-card,
+.checkout-store-card,
+.checkout-share-row {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.checkout-intro-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-end;
+  padding: 28px;
+}
+
+.checkout-eyebrow {
+  color: var(--accent-emerald);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.checkout-intro-card h2 { font-family: var(--font-heading); font-size: 28px; margin: 6px 0 8px; }
+.checkout-intro-card p { color: var(--text-muted); max-width: 620px; }
+
+.fulfillment-toggle {
+  display: inline-flex;
+  padding: 4px;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, .16);
+  white-space: nowrap;
+}
+
+.fulfillment-toggle button {
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: 700 13px var(--font-body);
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.fulfillment-toggle button.active { background: var(--accent-emerald); color: #06281f; }
+
+.checkout-notice {
+  margin: 14px 0 20px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--accent-amber);
+  color: #fcd34d;
+  background: rgba(245, 158, 11, .08);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.checkout-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 16px; }
+.checkout-store-card { border-top: 4px solid var(--store-color); padding: 20px; }
+.checkout-store-card header { align-items: flex-start; display: flex; gap: 16px; justify-content: space-between; }
+.checkout-store-card h3 { font: 700 17px var(--font-heading); margin-top: 2px; }
+.checkout-store-card header > strong { color: var(--store-color); font: 800 20px var(--font-heading); white-space: nowrap; }
+.store-name { color: var(--store-color); font-size: 13px; font-weight: 700; }
+.checkout-store-card > p { color: var(--text-muted); font-size: 13px; margin: 12px 0 16px; }
+.checkout-actions { display: flex; gap: 10px; margin-bottom: 16px; }
+.checkout-actions .primary-btn, .checkout-actions .secondary-btn { align-items: center; display: inline-flex; justify-content: center; min-height: 42px; text-decoration: none; }
+.official-store-link { flex: 1; white-space: nowrap; }
+.checkout-products { display: grid; gap: 8px; list-style: none; }
+.checkout-products li { align-items: center; border-top: 1px solid var(--border-glass); display: flex; font-size: 13px; gap: 12px; justify-content: space-between; padding-top: 8px; }
+.checkout-products span { color: var(--text-muted); min-width: 0; }
+.checkout-products a { color: var(--accent-emerald); font-weight: 700; text-decoration: none; white-space: nowrap; }
+.checkout-share-row { align-items: center; display: flex; gap: 14px; justify-content: space-between; margin-top: 20px; padding: 16px 20px; }
+.checkout-share-row span { color: var(--text-muted); font-size: 13px; }
+
+.fulfillment-toggle button:focus-visible,
+.checkout-actions a:focus-visible,
+.checkout-products a:focus-visible { outline: 3px solid #fcd34d; outline-offset: 3px; }
 
 .tab-btn:hover {
   color: #fff;
