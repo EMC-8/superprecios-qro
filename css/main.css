@@ -269,6 +269,28 @@ body {
   font-size: 13px;
 }
 
+.checkout-profile-card {
+  align-items: end;
+  background: rgba(16, 185, 129, .08);
+  border: 1px solid rgba(16, 185, 129, .3);
+  border-radius: var(--radius-lg);
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) 160px auto;
+  margin: 16px 0;
+  padding: 20px;
+}
+
+.checkout-profile-copy h3 { font: 700 18px var(--font-heading); margin: 4px 0; }
+.checkout-profile-copy p { color: var(--text-muted); font-size: 13px; max-width: 560px; }
+.checkout-postal-field { color: var(--text-muted); display: grid; font-size: 12px; font-weight: 700; gap: 6px; }
+.checkout-postal-field input { background: rgba(12, 17, 29, .75); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: var(--text-main); font: 600 16px var(--font-body); min-height: 44px; padding: 0 12px; }
+.checkout-postal-field input:focus { border-color: var(--accent-emerald); outline: 3px solid rgba(16, 185, 129, .2); }
+.checkout-profile-actions { align-items: center; display: flex; gap: 10px; }
+.checkout-profile-actions .primary-btn { min-height: 44px; white-space: nowrap; }
+.text-btn { background: none; border: 0; color: var(--text-muted); cursor: pointer; font: 600 13px var(--font-body); text-decoration: underline; white-space: nowrap; }
+.checkout-profile-message { color: #fcd34d; font-size: 12px; grid-column: 1 / -1; min-height: 18px; }
+
 .checkout-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 16px; }
 .checkout-store-card { border-top: 4px solid var(--store-color); padding: 20px; }
 .checkout-store-card header { align-items: flex-start; display: flex; gap: 16px; justify-content: space-between; }
@@ -288,7 +310,8 @@ body {
 
 .fulfillment-toggle button:focus-visible,
 .checkout-actions a:focus-visible,
-.checkout-products a:focus-visible { outline: 3px solid #fcd34d; outline-offset: 3px; }
+.checkout-products a:focus-visible,
+.text-btn:focus-visible { outline: 3px solid #fcd34d; outline-offset: 3px; }
 
 .tab-btn:hover {
   color: #fff;

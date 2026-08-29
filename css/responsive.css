@@ -110,6 +110,8 @@
 
   .checkout-intro-card h2 { font-size: 23px; }
   .checkout-grid { grid-template-columns: 1fr; }
+  .checkout-profile-card { align-items: stretch; grid-template-columns: 1fr; padding: 16px; }
+  .checkout-profile-actions { flex-wrap: wrap; }
   .checkout-actions { flex-direction: column; }
   .checkout-actions .primary-btn, .checkout-actions .secondary-btn { width: 100%; }
 

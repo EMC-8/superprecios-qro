@@ -7,6 +7,7 @@ import { parseShoppingListText, parseLine } from './parser.js';
 import { calculateOptimizations } from './optimizer.js';
 import { initPWA, promptInstallApp } from './pwa.js';
 import { buildShareUrl, copyText, formatStoreList, getOfficialProductUrl, getOfficialStoreUrl, readSharedCart } from './checkout.js';
+import { clearShopperProfile, isCheckoutReady, loadShopperProfile, saveShopperProfile } from './profile.js';
 
 // --- ESTADO GLOBAL DE LA APP ---
 const AppState = {
@@ -17,7 +18,8 @@ const AppState = {
   searchQuery: '',
   selectedCategory: 'all',
   activeStoreFilter: 'all',
-  fulfillment: 'delivery'
+  fulfillment: 'delivery',
+  shopperProfile: { postalCode: '', fulfillment: 'delivery', updatedAt: null }
 };
 
 const STORAGE_KEY = 'superprecios_qro_list_v1';
@@ -46,6 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- PERSISTENCIA LOCALSTORAGE ---
 function loadSavedState() {
   try {
+    AppState.shopperProfile = loadShopperProfile();
+    AppState.fulfillment = AppState.shopperProfile.fulfillment;
     const savedList = localStorage.getItem(STORAGE_KEY);
     if (savedList) {
       AppState.shoppingList = JSON.parse(savedList);
@@ -500,6 +504,7 @@ function renderCheckout() {
   if (AppState.activeStoreFilter !== 'all') groups = groups.filter(group => group.store.id === AppState.activeStoreFilter);
   if (!groups.length) groups = getActiveStoreGroups();
   const fulfillmentLabel = AppState.fulfillment === 'pickup' ? 'Recoger en tienda' : 'Entrega a domicilio';
+  const checkoutReady = isCheckoutReady(AppState.shopperProfile);
 
   container.innerHTML = `
     <div class="checkout-intro-card">
@@ -509,14 +514,51 @@ function renderCheckout() {
         <button class="${AppState.fulfillment === 'pickup' ? 'active' : ''}" data-fulfillment="pickup">Pickup</button>
       </div>
     </div>
+    <form class="checkout-profile-card" id="checkout-profile-form">
+      <div class="checkout-profile-copy">
+        <span class="checkout-eyebrow">Tu zona de compra</span>
+        <h3>${checkoutReady ? 'Plan listo para continuar' : 'Personaliza tu entrega'}</h3>
+        <p>${checkoutReady ? `Código postal ${escapeHtml(AppState.shopperProfile.postalCode)}. La confirmación final seguirá siendo en cada tienda.` : 'Agrega tu código postal para recordar tu zona. No guardamos dirección ni datos de pago.'}</p>
+      </div>
+      <label class="checkout-postal-field" for="checkout-postal-code">Código postal
+        <input id="checkout-postal-code" name="postalCode" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{5}" maxlength="5" placeholder="Ej. 76000" value="${escapeHtml(AppState.shopperProfile.postalCode)}">
+      </label>
+      <div class="checkout-profile-actions">
+        <button class="primary-btn" type="submit">Guardar zona</button>
+        ${checkoutReady ? '<button class="text-btn" type="button" data-clear-profile>Quitar datos</button>' : ''}
+      </div>
+      <p class="checkout-profile-message" aria-live="polite"></p>
+    </form>
     <div class="checkout-notice">La modalidad es una preferencia. El supermercado confirma disponibilidad, mínimo de compra y cualquier costo al finalizar.</div>
     <div class="checkout-grid">${groups.map(group => renderCheckoutStore(group, fulfillmentLabel)).join('')}</div>
     <div class="checkout-share-row"><button class="secondary-btn" data-copy-share>Copiar enlace de esta canasta</button><span>Comparte la misma lista sin crear una cuenta.</span></div>`;
 
   container.querySelectorAll('[data-fulfillment]').forEach(button => button.addEventListener('click', () => {
     AppState.fulfillment = button.dataset.fulfillment;
+    AppState.shopperProfile = saveShopperProfile({ ...AppState.shopperProfile, fulfillment: AppState.fulfillment, updatedAt: new Date().toISOString() });
     renderCheckout();
   }));
+  container.querySelector('#checkout-profile-form').addEventListener('submit', event => {
+    event.preventDefault();
+    const postalCode = new FormData(event.currentTarget).get('postalCode');
+    const message = event.currentTarget.querySelector('.checkout-profile-message');
+    if (!postalCode) {
+      message.textContent = 'Ingresa un código postal de cinco dígitos para guardar tu zona.';
+      return;
+    }
+    try {
+      AppState.shopperProfile = saveShopperProfile({ postalCode, fulfillment: AppState.fulfillment, updatedAt: new Date().toISOString() });
+      message.textContent = 'Zona guardada en este dispositivo.';
+      renderCheckout();
+    } catch (error) {
+      message.textContent = error.message;
+    }
+  });
+  container.querySelector('[data-clear-profile]')?.addEventListener('click', () => {
+    AppState.shopperProfile = clearShopperProfile();
+    AppState.fulfillment = AppState.shopperProfile.fulfillment;
+    renderCheckout();
+  });
   container.querySelectorAll('[data-copy-list]').forEach(button => button.addEventListener('click', async () => {
     const group = groups.find(candidate => candidate.store.id === button.dataset.copyList);
     if (!group) return;

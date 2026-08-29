@@ -27,6 +27,9 @@
 5. **↗ Compra en canales oficiales**:
    - Genera una lista por supermercado, enlaces oficiales de búsqueda por producto y un enlace compartible de la canasta.
    - El usuario final confirma en el sitio del supermercado la cobertura, inventario, entrega o pickup y cualquier cargo aplicable.
+6. **📍 Perfil local de compra**:
+   - Guarda únicamente código postal y preferencia de entrega o pickup en el dispositivo.
+   - No requiere cuenta, no guarda dirección ni datos de pago, y esos datos nunca viajan en el enlace de la canasta.
 5. **🏷️ Catálogo con Códigos de Barras Oficiales (EAN-13)**:
    - Productos estandarizados con sus códigos GTIN/EAN-13 registrados ante GS1 México y enlaces de verificación.
 
