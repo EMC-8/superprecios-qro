@@ -10,6 +10,17 @@
  * sin tocar código y que una lista guardada no se quede con precios viejos.
  */
 
+/**
+ * Convierte un termino a slug para las cadenas que buscan por ruta y no por
+ * query string (HEB). Viene de upstream.
+ */
+export const toSearchSlug = term => String(term)
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '');
+
 export const SUPERMARKETS = {
   aurrera: {
     id: 'aurrera',
@@ -19,6 +30,7 @@ export const SUPERMARKETS = {
     accentColor: '#fecb00',
     logoText: '🟢 Aurrera',
     logoIcon: '🛒',
+    homeUrl: 'https://www.bodegaaurrera.com.mx/',
     searchUrl: (query) => `https://www.bodegaaurrera.com.mx/search?q=${encodeURIComponent(query)}`,
     branchesQro: [
       { name: 'Suc. Satélite', zone: 'Av. de la Luz / Satélite' },
@@ -34,7 +46,9 @@ export const SUPERMARKETS = {
     accentColor: '#ff9933',
     logoText: '🟠 Chedraui',
     logoIcon: '🏪',
-    searchUrl: (query) => `https://www.chedraui.com.mx/search?q=${encodeURIComponent(query)}`,
+    homeUrl: 'https://www.chedraui.com.mx/',
+    // Chedraui resuelve la busqueda por ruta con ?map=ft, no por /search?q=
+    searchUrl: (query) => `https://www.chedraui.com.mx/${encodeURIComponent(query)}?map=ft`,
     branchesQro: [
       { name: 'Chedraui Centro Sur', zone: 'Centro Sur / Bernardo Quintana' },
       { name: 'Chedraui Selecto Juriquilla', zone: 'Antea / Juriquilla' },
@@ -49,6 +63,7 @@ export const SUPERMARKETS = {
     accentColor: '#ffc220',
     logoText: '🔵 Walmart',
     logoIcon: '⭐',
+    homeUrl: 'https://www.walmart.com.mx/',
     searchUrl: (query) => `https://www.walmart.com.mx/search?q=${encodeURIComponent(query)}`,
     branchesQro: [
       { name: 'Walmart Bernardo Quintana', zone: 'B. Quintana / Arboledas' },
@@ -65,6 +80,7 @@ export const SUPERMARKETS = {
     accentColor: '#84bd00',
     logoText: '🔴 Soriana',
     logoIcon: '❤️',
+    homeUrl: 'https://www.soriana.com/',
     searchUrl: (query) => `https://www.soriana.com/buscar?q=${encodeURIComponent(query)}`,
     branchesQro: [
       { name: 'Soriana Plaza del Parque', zone: 'B. Quintana / Álamos' },
@@ -80,7 +96,10 @@ export const SUPERMARKETS = {
     accentColor: '#2b7a33',
     logoText: '🟡 La Comer',
     logoIcon: '🍊',
-    searchUrl: () => `https://www.lacomer.com.mx/lacomer/`,
+    homeUrl: 'https://www.lacomer.com.mx/',
+    // La Comer no expone una ruta publica estable de resultados. Se conserva el
+    // termino legible en la URL y la compra guiada tambien lo copia al portapapeles.
+    searchUrl: (query) => `https://www.lacomer.com.mx/lacomer/?q=${encodeURIComponent(query)}`,
     branchesQro: [
       { name: 'La Comer El Refugio', zone: 'Fray Junípero Serra / El Refugio' },
       { name: 'La Comer Juriquilla', zone: 'Av. Juriquilla Santa Fe' },
@@ -95,7 +114,9 @@ export const SUPERMARKETS = {
     accentColor: '#ffffff',
     logoText: '🟥 HEB',
     logoIcon: '🥩',
-    searchUrl: (query) => `https://www.heb.com.mx/catalogsearch/result/?q=${encodeURIComponent(query)}`,
+    homeUrl: 'https://www.heb.com.mx/',
+    // HEB busca por slug en la ruta, no por query string.
+    searchUrl: (query) => `https://www.heb.com.mx/${toSearchSlug(query)}`,
     branchesQro: [
       { name: 'HEB Juriquilla', zone: 'Blvd. Universitario / Juriquilla' },
       { name: 'HEB Bernardo Quintana', zone: 'B. Quintana / Álamos' },

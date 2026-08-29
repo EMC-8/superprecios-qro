@@ -58,9 +58,18 @@ w('-- Cadenas');
 w('insert into public.stores (id, name, short_name, color, accent_color, logo_text, search_url_template) values');
 w(Object.values(SUPERMARKETS).map(s => {
   // searchUrl es una función; se guarda la plantilla con {query} como marcador.
+  //
+  // El centinela es alfanumérico a propósito: algunas cadenas normalizan el
+  // término (HEB lo convierte a slug), y un marcador con llaves se pierde en el
+  // camino dejando una URL rota sin que nadie se entere.
+  const CENTINELA = 'qqqueryqqq';
   let template = null;
   try {
-    template = s.searchUrl('{query}').replace(encodeURIComponent('{query}'), '{query}');
+    const url = s.searchUrl(CENTINELA);
+    template = url.includes(CENTINELA) ? url.replace(CENTINELA, '{query}') : null;
+    if (template === null) {
+      console.warn(`  ⚠️  ${s.id}: searchUrl transformó el marcador; se guarda sin plantilla.`);
+    }
   } catch (e) {
     template = null;
   }

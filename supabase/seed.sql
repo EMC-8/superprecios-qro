@@ -7,11 +7,11 @@ begin;
 -- Cadenas
 insert into public.stores (id, name, short_name, color, accent_color, logo_text, search_url_template) values
   ('aurrera', 'Bodega Aurrera', 'Aurrera', '#00833e', '#fecb00', '🟢 Aurrera', 'https://www.bodegaaurrera.com.mx/search?q={query}'),
-  ('chedraui', 'Chedraui / Chedraui Selecto', 'Chedraui', '#ff6600', '#ff9933', '🟠 Chedraui', 'https://www.chedraui.com.mx/search?q={query}'),
+  ('chedraui', 'Chedraui / Chedraui Selecto', 'Chedraui', '#ff6600', '#ff9933', '🟠 Chedraui', 'https://www.chedraui.com.mx/{query}?map=ft'),
   ('walmart', 'Walmart Supercenter', 'Walmart', '#0071ce', '#ffc220', '🔵 Walmart', 'https://www.walmart.com.mx/search?q={query}'),
   ('soriana', 'Soriana Híper', 'Soriana', '#e31b23', '#84bd00', '🔴 Soriana', 'https://www.soriana.com/buscar?q={query}'),
-  ('lacomer', 'La Comer / Fresko', 'La Comer', '#ff5500', '#2b7a33', '🟡 La Comer', 'https://www.lacomer.com.mx/lacomer/'),
-  ('heb', 'HEB Querétaro', 'HEB', '#d6001c', '#ffffff', '🟥 HEB', 'https://www.heb.com.mx/catalogsearch/result/?q={query}')
+  ('lacomer', 'La Comer / Fresko', 'La Comer', '#ff5500', '#2b7a33', '🟡 La Comer', 'https://www.lacomer.com.mx/lacomer/?q={query}'),
+  ('heb', 'HEB Querétaro', 'HEB', '#d6001c', '#ffffff', '🟥 HEB', 'https://www.heb.com.mx/{query}')
 on conflict (id) do update set
   name = excluded.name, short_name = excluded.short_name, color = excluded.color,
   accent_color = excluded.accent_color, logo_text = excluded.logo_text,
