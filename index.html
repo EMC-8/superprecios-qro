@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SuperPrecios QRO - Comparador de Supermercados en Querétaro</title>
+  <meta name="description" content="Compara precios y ahorra en el súper en Querétaro. Descubre qué comprar en Walmart, HEB, Chedraui, Soriana, La Comer y Bodega Aurrera con el mejor precio.">
+  <meta name="theme-color" content="#10b981">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SuperPrecios">
+
+  <!-- PWA Manifest & Icons -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg">
+  <link rel="apple-touch-icon" href="assets/icons/icon.svg">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Header Principal -->
+    <header class="app-header">
+      <div class="brand-area">
+        <div class="brand-icon">🥑</div>
+        <div>
+          <h1 class="brand-title">SuperPrecios <span>QRO</span></h1>
+          <span class="location-tag">📍 Querétaro, Qro.</span>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <div class="verified-badge" title="Precios verificados en sitios oficiales de supermercados">
+          🟢 Precios Oficiales Verificados
+        </div>
+        <div id="offline-badge" class="offline-badge hidden">📡 Offline</div>
+        <button id="btn-install-app" class="install-btn hidden" title="Instalar aplicación en tu pantalla">
+          📲 Instalar PWA
+        </button>
+      </div>
+    </header>
+
+    <!-- Barra de Navegación por Pestañas -->
+    <nav class="tabs-navigation" aria-label="Navegación principal">
+      <button class="tab-btn active" data-tab="optimizer">
+        <span class="tab-icon">⚡</span>
+        <span>Ahorro & Ruta</span>
+      </button>
+      <button class="tab-btn" data-tab="list">
+        <span class="tab-icon">📝</span>
+        <span>Mi Lista</span>
+        <span id="cart-count-badge" class="tab-badge hidden">0</span>
+      </button>
+      <button class="tab-btn" data-tab="supermarket">
+        <span class="tab-icon">🛒</span>
+        <span>Modo Súper</span>
+      </button>
+      <button class="tab-btn" data-tab="catalog">
+        <span class="tab-icon">🔍</span>
+        <span>Catálogo</span>
+      </button>
+    </nav>
+
+    <!-- PANE 1: OPTIMIZADOR Y RUTA DE COMPRA -->
+    <section id="tab-optimizer" class="tab-pane active">
+      <!-- Selector de Estrategia de Compra -->
+      <div class="strategy-bar">
+        <button class="strategy-pill active" data-strategy="split">
+          <strong>🌟 Máximo Ahorro</strong>
+          <small>Comprar cada ítem donde esté más barato</small>
+        </button>
+        <button class="strategy-pill" data-strategy="two-stores">
+          <strong>⚖️ Ruta Práctica (2 Tiendas)</strong>
+          <small>Alto ahorro visitando sólo 2 súper</small>
+        </button>
+        <button class="strategy-pill" data-strategy="single">
+          <strong>🏪 1 Sola Tienda</strong>
+          <small>El supermercado único más barato</small>
+        </button>
+      </div>
+
+      <!-- Contenedor dinámico de resultados (Hero + Gráficas + Tarjetas por tienda) -->
+      <div id="optimization-results">
+        <!-- Renderizado dinámicamente por app.js -->
+      </div>
+
+      <!-- Botón de compartir ruta -->
+      <div style="text-align: center; margin-top: 24px;">
+        <button id="btn-share-whatsapp" class="primary-btn" style="background: #25D366; color: #000; font-weight: 700;">
+          📲 Compartir Ruta por WhatsApp
+        </button>
+      </div>
+    </section>
+
+    <!-- PANE 2: CREADOR Y EDITOR DE LISTA -->
+    <section id="tab-list" class="tab-pane">
+      <div class="list-creator-grid">
+        
+        <!-- Entrada de Texto Rápido -->
+        <div class="quick-input-card">
+          <h3>✍️ Pega o escribe tu lista de compras</h3>
+          <p>Escribe productos y cantidades libres. Nuestro parser detectará kilos y piezas automáticamente.</p>
+          
+          <textarea 
+            id="quick-list-text" 
+            class="quick-textarea" 
+            placeholder="Ejemplo:&#10;2kg pechuga de pollo&#10;1kg jitomate&#10;2 leche lala entera&#10;1 huevo san juan&#10;1 aceite nutrioli&#10;1 pan bimbo&#10;1 papel de bano"
+          ></textarea>
+
+          <div class="quick-actions-row">
+            <button id="btn-process-text" class="primary-btn">
+              ⚡ Procesar y Optimizar
+            </button>
+            <button id="btn-clear-list" class="secondary-btn">
+              🗑️ Vaciar
+            </button>
+          </div>
+        </div>
+
+        <!-- Plantillas de Canastas de Ejemplo -->
+        <div class="sample-lists-card">
+          <h3>⚡ Canastas Populares en Querétaro</h3>
+          <p>Carga una canasta representativa con un solo clic para comparar de inmediato:</p>
+          <div id="sample-lists-container" class="sample-buttons-list">
+            <!-- Renderizado dinámicamente -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Listado de Productos Actuales -->
+      <div class="current-items-section">
+        <div class="section-header-row">
+          <h3>🛒 Productos en tu Canasta Actual</h3>
+        </div>
+        
+        <div id="empty-list-state" class="empty-state-card hidden">
+          <div class="empty-icon">📝</div>
+          <p>No tienes productos en tu lista. Escribe arriba o selecciona una canasta de ejemplo.</p>
+        </div>
+
+        <div id="shopping-list-items" class="shopping-items-grid">
+          <!-- Renderizado dinámicamente -->
+        </div>
+      </div>
+    </section>
+
+    <!-- PANE 3: MODO SUPERMERCADO (CHECKLIST INTERACTIVO) -->
+    <section id="tab-supermarket" class="tab-pane">
+      <div id="supermarket-mode-container">
+        <!-- Renderizado dinámicamente por app.js -->
+      </div>
+    </section>
+
+    <!-- PANE 4: EXPLORADOR DE CATÁLOGO Y PRECIOS -->
+    <section id="tab-catalog" class="tab-pane">
+      <div class="catalog-header-bar">
+        <div class="search-input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            id="catalog-search-input" 
+            class="search-input" 
+            placeholder="Buscar por nombre o marca (ej. pechuga, huevo, leche lala, jabón)..."
+          >
+        </div>
+
+        <div id="category-chips" class="category-chips-scroll">
+          <!-- Chips de categorías -->
+        </div>
+      </div>
+
+      <div id="catalog-items-grid" class="catalog-grid">
+        <!-- Tarjetas de catálogo -->
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

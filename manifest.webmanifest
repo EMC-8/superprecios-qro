@@ -1,0 +1,30 @@
+{
+  "name": "SuperPrecios QRO - Comparador de Supermercados",
+  "short_name": "SuperPrecios",
+  "description": "Compara precios y optimiza tu lista de compras en supermercados de Querétaro (Walmart, HEB, Chedraui, Soriana, La Comer, Aurrera).",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c111d",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "categories": ["shopping", "finance", "lifestyle"],
+  "icons": [
+    {
+      "src": "./assets/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

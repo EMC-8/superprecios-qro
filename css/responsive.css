@@ -1,0 +1,130 @@
+/* Adaptabilidad Responsiva y Experiencia Móvil PWA */
+
+@media (max-width: 768px) {
+  .app-container {
+    padding: 12px 10px 90px;
+  }
+
+  .app-header {
+    padding: 10px 14px;
+    margin-bottom: 16px;
+  }
+
+  .brand-title {
+    font-size: 17px;
+  }
+
+  .brand-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+  }
+
+  .location-tag {
+    display: none;
+  }
+
+  /* Barra de navegación inferior fija para móviles */
+  .tabs-navigation {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(12, 17, 29, 0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0;
+    margin-bottom: 0;
+    padding: 8px 6px;
+    z-index: 1000;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  }
+
+  .tab-btn {
+    flex-direction: column;
+    gap: 3px;
+    font-size: 11px;
+    padding: 6px 4px;
+  }
+
+  .tab-btn .tab-icon {
+    font-size: 18px;
+  }
+
+  .tab-badge {
+    position: absolute;
+    top: 4px;
+    right: 18%;
+    font-size: 9px;
+    padding: 1px 5px;
+  }
+
+  /* Grid de creador de lista a 1 columna */
+  .list-creator-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .quick-textarea {
+    height: 140px;
+  }
+
+  /* Hero de ahorro */
+  .savings-hero-card {
+    padding: 18px 16px;
+  }
+
+  .savings-main-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .savings-delta-pill {
+    width: 100%;
+    align-items: flex-start;
+    text-align: left;
+    padding: 10px 14px;
+  }
+
+  .savings-total {
+    font-size: 32px;
+  }
+
+  .strategy-bar {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .strategy-pill {
+    min-width: unset;
+  }
+
+  .store-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+  }
+
+  .catalog-card {
+    padding: 12px;
+  }
+
+  .product-title {
+    font-size: 13.5px;
+  }
+
+  .price-mini-grid {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+@media (min-width: 769px) {
+  .tab-btn .tab-icon {
+    font-size: 16px;
+  }
+}
