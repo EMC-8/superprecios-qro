@@ -25,8 +25,9 @@ import {
 import { adaptador as profeco } from './adapters/profeco.mjs';
 import { adaptador as chedraui } from './adapters/chedraui.mjs';
 import { adaptador as manual } from './adapters/csv-manual.mjs';
+import { adaptador as walmart } from './adapters/walmart.mjs';
 
-const ADAPTADORES = [chedraui, profeco, manual];
+const ADAPTADORES = [chedraui, profeco, manual, walmart];
 
 const args = process.argv.slice(2);
 const flag = (n) => args.includes(n);
