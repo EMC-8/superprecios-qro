@@ -1,7 +1,7 @@
 name: Actualizar precios
 
-# Corre el scraper, guarda el histórico en Supabase y commitea data/prices.json.
-# Al commitear, Vercel redespliega solo y la PWA queda con los precios nuevos.
+# Corre el scraper, guarda el histórico en Supabase y abre/actualiza un Pull Request con data/prices.json.
+# Al fusionar el PR en main, GitHub Pages / Vercel redespliega y la PWA queda con los precios nuevos.
 on:
   schedule:
     # Lunes, miércoles y viernes a las 9:00 UTC (3:00 AM en Querétaro).
@@ -14,16 +14,20 @@ on:
         required: false
         type: string
 
+concurrency:
+  group: actualizar-precios
+  cancel-in-progress: false
+
 jobs:
   actualizar:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
 
@@ -45,14 +49,26 @@ jobs:
       - name: Correr las pruebas
         run: npm test
 
-      - name: Commitear los precios nuevos
-        run: |
-          if git diff --quiet data/prices.json; then
-            echo "Sin cambios en los precios; no hay nada que commitear."
-            exit 0
-          fi
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/prices.json
-          git commit -m "chore: actualiza precios ($(date -u +%Y-%m-%d))"
-          git push
+      - name: Generar token de GitHub App
+        uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Crear o actualizar Pull Request
+        uses: peter-evans/create-pull-request@v8.1.1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          branch: chore/actualizar-precios
+          base: main
+          title: 'chore(data): actualizar precios vigentes'
+          commit-message: 'chore(data): actualiza precios vigentes'
+          body: |
+            Actualización automática periódica de precios en `data/prices.json`.
+
+            - Generado por el scraper automatizado de SuperPrecios QRO.
+            - Validado con `npm run validate:prices` y `npm test`.
+          add-paths: |
+            data/prices.json
+          delete-branch: false
