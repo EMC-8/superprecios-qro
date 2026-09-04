@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "start": "python -m http.server 8080",
-    "test": "node --test test",
+    "test": "node --test test/runner.mjs",
     "validate:prices": "node scripts/validate-prices.mjs",
     "scrape": "node scraper/run.mjs",
     "scrape:dry": "node scraper/run.mjs --dry-run",

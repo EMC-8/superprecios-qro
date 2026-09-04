@@ -49,9 +49,9 @@
     {
       "ean": "7501000111204",
       "nombre": "Pan Blanco Bimbo Grande 620g",
-      "us_item_id": "00750100011120",
+      "us_item_id": "00750081002918",
       "match_type": "name_verified",
-      "notas": "Validado 2026-09-03. Consulta directa por ID confirmada."
+      "notas": "Validado 2026-09-03. Consulta directa por ID confirmada (rotado de 00750100011120)."
     },
     {
       "ean": "7501025400032",
@@ -73,15 +73,17 @@
       "us_item_id": "00075810400317",
       "match_type": "name_verified",
       "notas": "Validado 2026-09-03. Consulta directa por ID confirmada."
+    },
+    {
+      "ean": "7501166300405",
+      "nombre": "Huevo Blanco San Juan (Cartera 30 piezas)",
+      "us_item_id": "00750300055517",
+      "match_type": "name_verified",
+      "notas": "Validado 2026-09-03. Coincidencia exacta con 'Huevo blanco San Juan 30 pzas'."
     }
   ],
 
   "_sin_mapear": [
-    {
-      "ean": "7501166300405",
-      "nombre": "Huevo Blanco San Juan (Cartera 30 piezas)",
-      "motivo": "No encontrado en pruebas de matching. Buscar por nombre 'Huevo San Juan 30 piezas' en SerpApi y verificar que presentación coincida exactamente."
-    },
     {
       "ean": "7501020521015",
       "nombre": "Crema Ácida Lala 450ml",
