@@ -6,7 +6,8 @@ así** y **qué sigue**.
 
 Si sólo vas a tocar código, lee las secciones 1, 3 y 4. Si vas a tomar
 decisiones de producto, lee también la 2. Si vas a continuar el trabajo de
-Walmart, ve directamente a la sección 6.
+Walmart, ve directamente a la sección 6. Si vas a integrar una tienda nueva,
+consulta la guía general en [`docs/GUIA-INTEGRACION-NUEVA-TIENDA.md`](docs/GUIA-INTEGRACION-NUEVA-TIENDA.md).
 
 ---
 
@@ -613,3 +614,4 @@ Comer, Bodega Aurrera, Oxxo). Latencia de meses. HEB no participa.
 7. **No repetir experimentos HTTP/Playwright.** Ya están documentados como NO VIABLES.
 8. **Mantener el alcance en los 19 productos de `js/data.js`.**
 9. **Ante la duda, consultar `AGENTS.md` y esta sección 9.**
+10. **Para integrar futuras tiendas o fuentes de precios**, consulta [`docs/GUIA-INTEGRACION-NUEVA-TIENDA.md`](docs/GUIA-INTEGRACION-NUEVA-TIENDA.md) para el procedimiento general reproducible.
