@@ -1,0 +1,126 @@
+{
+  "_comment": "Mapping EAN → us_item_id de Walmart México. Obtenidos vía SerpApi (engine=walmart, walmart_domain=walmart.com.mx). Verificar manualmente antes de agregar. Nunca generar IDs a partir del EAN.",
+  "_actualizado": "2026-09-03",
+  "_instrucciones": "Para agregar un producto: 1) Buscar por nombre en SerpApi, 2) Verificar que marca + presentación coincidan exactamente con js/data.js, 3) Agregar entrada en 'items'. Para productos sin match exacto, documentar en '_sin_mapear' con el motivo.",
+
+  "items": [
+    {
+      "ean": "7501020513478",
+      "nombre": "Leche Lala Entera 1 Litro",
+      "us_item_id": "00750102056593",
+      "match_type": "name_verified",
+      "notas": "Validado 2026-09-03. Consulta directa por ID confirmada."
+    },
+    {
+      "ean": "7501040001019",
+      "nombre": "Queso Panela FUD en Bloque 400g",
+      "us_item_id": "00750104008370",
+      "match_type": "name_verified",
+      "notas": "Validado 2026-09-03. Consulta directa por ID confirmada."
+    },
+    {
+      "ean": "7501078100232",
+      "nombre": "Frijol Negro Verde Valle 900g",
+      "us_item_id": "00750107130135",
+      "match_type": "name_verified",
+      "notas": "Validado 2026-09-03. Consulta directa por ID confirmada."
+    },
+    {
+      "ean": "7501045401340",
+      "nombre": "Atún Dolores en Agua Aleta Amarilla 140g",
+      "us_item_id": "00750104540314",
+      "match_type": "name_verified",
+      "notas": "Validado 2026-09-03. Consulta directa por ID confirmada."
+    },
+    {
+      "ean": "7501005101019",
+      "nombre": "Mayonesa McCormick con Limón 390g",
+      "us_item_id": "00750100334013",
+      "match_type": "name_verified",
+      "notas": "Validado 2026-09-03. Consulta directa por ID confirmada."
+    },
+    {
+      "ean": "7501075600025",
+      "nombre": "Pasta Espagueti Barilla 500g",
+      "us_item_id": "00807680951520",
+      "match_type": "name_verified",
+      "notas": "Validado 2026-09-03. Consulta directa por ID confirmada."
+    },
+    {
+      "ean": "7501000111204",
+      "nombre": "Pan Blanco Bimbo Grande 620g",
+      "us_item_id": "00750100011120",
+      "match_type": "name_verified",
+      "notas": "Validado 2026-09-03. Consulta directa por ID confirmada."
+    },
+    {
+      "ean": "7501025400032",
+      "nombre": "Cloro Cloralex El Rendidor 950ml",
+      "us_item_id": "00000007500061",
+      "match_type": "name_verified",
+      "notas": "Validado 2026-09-03. Consulta directa por ID confirmada."
+    },
+    {
+      "ean": "7501064191343",
+      "nombre": "Cerveza Corona Extra 6-Pack Latas 355ml",
+      "us_item_id": "00750106419071",
+      "match_type": "name_verified",
+      "notas": "Validado 2026-09-03. Consulta directa por ID confirmada."
+    },
+    {
+      "ean": "7501003601559",
+      "nombre": "Agua Purificada Bonafont Garrafón 6 Litros",
+      "us_item_id": "00075810400317",
+      "match_type": "name_verified",
+      "notas": "Validado 2026-09-03. Consulta directa por ID confirmada."
+    }
+  ],
+
+  "_sin_mapear": [
+    {
+      "ean": "7501166300405",
+      "nombre": "Huevo Blanco San Juan (Cartera 30 piezas)",
+      "motivo": "No encontrado en pruebas de matching. Buscar por nombre 'Huevo San Juan 30 piezas' en SerpApi y verificar que presentación coincida exactamente."
+    },
+    {
+      "ean": "7501020521015",
+      "nombre": "Crema Ácida Lala 450ml",
+      "motivo": "Solo se encontró presentación de 426ml en SerpApi durante matching. La presentación 450ml no fue confirmada."
+    },
+    {
+      "ean": "7501039100063",
+      "nombre": "Aceite Vegetal Nutrioli Puro de Soya 850ml",
+      "motivo": "Se encontraron variantes de Nutrioli pero no exactamente 850ml confirmado durante matching."
+    },
+    {
+      "ean": "7501078100119",
+      "nombre": "Arroz Súper Extra Verde Valle 900g",
+      "motivo": "Se encontró Arroz Súper Extra 1kg, no 900g. Presentación diferente al catálogo."
+    },
+    {
+      "ean": "7501058617873",
+      "nombre": "Café Soluble Nescafé Clásico 120g",
+      "motivo": "Pendiente de verificar us_item_id. Requiere búsqueda por nombre en SerpApi."
+    },
+    {
+      "ean": "7501055304745",
+      "nombre": "Refresco Coca-Cola Original 2.5 Litros",
+      "motivo": "Pendiente de verificar us_item_id. Requiere búsqueda por nombre en SerpApi."
+    },
+    {
+      "ean": "7501943440129",
+      "nombre": "Papel Higiénico Pétalo Rendimax 12 rollos",
+      "motivo": "Solo marketplace, no first-party Walmart confiable encontrado durante matching."
+    },
+    {
+      "ean": "7500435128031",
+      "nombre": "Detergente en Polvo Ariel Doble Poder 1kg",
+      "motivo": "No confirmado en ninguna fuente durante matching. Requiere búsqueda manual."
+    },
+    {
+      "ean": "7509546071856",
+      "nombre": "Lavatrastes Líquido Axión Limón 750ml",
+      "motivo": "Pendiente de verificar us_item_id. Requiere búsqueda por nombre en SerpApi."
+    }
+  ]
+}
