@@ -5,7 +5,8 @@ conversaciones previas. Explica **en qué estado está**, **por qué está armad
 así** y **qué sigue**.
 
 Si sólo vas a tocar código, lee las secciones 1, 3 y 4. Si vas a tomar
-decisiones de producto, lee también la 2.
+decisiones de producto, lee también la 2. Si vas a continuar el trabajo de
+Walmart, ve directamente a la sección 6.
 
 ---
 
@@ -25,7 +26,7 @@ te dice dónde comprar cada cosa.
 | Modo Supermercado (checklist) | ✅ completo |
 | Compra Guiada (handoff oficial) | ✅ integrada desde upstream |
 | Canasta compartible por enlace | ✅ completa, con validación de entrada |
-| Catálogo con EAN-13 | ✅ 19 productos |
+| Catálogo con EAN-13 | ✅ **19 productos** (fuente: `js/data.js`) |
 | PWA offline | ✅ Service Worker con app shell cache-first |
 | Avisos de calidad de datos | ✅ precios viejos, sin precio, copia local |
 | Esquema de base de datos | ✅ escrito y listo, **no aplicado todavía** |
@@ -41,6 +42,7 @@ te dice dónde comprar cada cosa.
 - **El catálogo son 19 productos** y no incluye perecederos (frutas, verduras,
   carne), que son justamente los que más varían de precio entre tiendas.
 - **HEB no tiene fuente automatizada.** Sólo captura manual.
+- **Walmart no tiene fuente automatizable confirmada.** Ver sección 6.
 
 ---
 
@@ -56,15 +58,16 @@ Se probó consultar directamente a los sitios de las cadenas. Respuestas reales:
 | Soriana | `403` con página de protección anti-bot |
 | HEB | `404` con inyección de script de detección |
 | La Comer | `404` (endpoint no público) |
+| **Walmart** | `307` → página de bloqueo Akamai "Verifica tu identidad" |
 
 Saltarse eso requeriría rotar identidades, resolver captchas o disfrazar el
 tráfico. **El proyecto no hace eso y no debe empezar a hacerlo**: además del
 problema legal, un pipeline construido sobre evasión se rompe cada dos semanas
 y no se puede mantener.
 
-Si alguien te pide "que jale el scraping de Walmart", la respuesta honesta es
-que eso requiere acceso legítimo (programa de afiliados, API oficial, convenio),
-no más ingeniería.
+> **REGLA PERMANENTE:** No usar stealth browsers, CAPTCHA solving, proxies para
+> evadir bloqueo, fingerprint spoofing ni ninguna técnica para evadir
+> Akamai/WAF/anti-bot de ninguna cadena.
 
 ### 2.2 La fuente automatizada es PROFECO, y publica tarde
 
@@ -188,7 +191,7 @@ js/
   app.js              Controlador, estado y render. El archivo grande.
   checkout.js         Handoff oficial y canasta compartible. ENTRADA INSEGURA.
   profile.js          Preferencia de entrega. Sin datos sensibles.
-  data.js             Catálogo de productos y cadenas. Sin precios.
+  data.js             Catálogo de 19 productos y cadenas. Sin precios. FUENTE DE VERDAD.
   prices.js           Carga de precios: Supabase → prices.json → caché local.
                       ← El contrato de datos vive documentado aquí arriba.
   optimizer.js        Motor de cálculo. Puro, sin DOM. Fácil de probar.
@@ -206,6 +209,7 @@ supabase/
 scraper/
   run.mjs             Orquestador: adaptadores → validación → consolidación → escritura
   adapters/profeco    Automático. Streaming de CSV de ~150 MB.
+  adapters/walmart    IMPLEMENTADO pero 0 precios obtenidos. Ver sección 6.
   adapters/csv-manual Captura a mano. Única vía para HEB.
   lib/http.mjs        Cliente con ritmo, reintentos y timeout. Sin evasión.
   lib/normalize.mjs   Validación y consolidación por mediana.
@@ -216,7 +220,7 @@ scripts/
   validate-prices.mjs Valida prices.json contra el contrato. Úsalo en CI.
   generate-seed.mjs   Regenera supabase/seed.sql desde js/data.js.
 
-test/                 30 pruebas con node:test, sin dependencias.
+test/                 51 pruebas con node:test, sin dependencias.
 docs/despliegue.md    Vercel + Supabase paso a paso.
 docs/scraping.md      Todo lo de la sección 2, con más detalle.
 ```
@@ -225,7 +229,7 @@ docs/scraping.md      Todo lo de la sección 2, con más detalle.
 
 ```bash
 npm start                  # servidor local en :8080
-npm test                   # 30 pruebas
+npm test                   # 51 pruebas (node --test test)
 npm run validate:prices    # valida data/prices.json
 npm run scrape:dry         # corre el pipeline sin escribir
 npm run scrape             # corre el pipeline de verdad
@@ -309,7 +313,303 @@ bloquea desplegar en Vercel.
 | `6fd66cb` | Pipeline de scraping, workflow de CI, documentación de despliegue |
 | `430f7d4` | Este documento |
 | *(fusión)* | Integra Compra Guiada, perfil y canasta compartible desde upstream |
+| `8a0fb1f` | **feat(scraper): agregar adaptador de Walmart Mexico para 19 productos del catalogo** — en `feature/walmart-scraper` |
 
 El repositorio de trabajo es **`EMC-8/superprecios-qro`**. El fork
 `JETER3/superprecios-qro` sirvió para desarrollar la reescritura y queda como
 respaldo; no se trabaja ahí.
+
+---
+
+## 6. Investigación y trabajo sobre Walmart México
+
+> **Esta sección documenta todo el trabajo realizado sobre Walmart en
+> `feature/walmart-scraper`. Es la parte más importante para quien retome.**
+
+### 6.1 Objetivo
+
+Agregar precios reales de Walmart México para los **19 productos del catálogo**
+(`js/data.js`). El alcance es ÚNICAMENTE esos 19 productos. No crawling de
+catálogo, no nuevos productos.
+
+### 6.2 Branch y commit
+
+- **Branch:** `feature/walmart-scraper`
+- **Commit de implementación:** `8a0fb1f feat(scraper): agregar adaptador de Walmart Mexico para 19 productos del catalogo`
+- **Tests:** 51 passed (se añadieron 10 tests de Walmart a los 41 existentes)
+- **`npm run validate:prices`:** OK
+- **`npm run scrape:dry` (Walmart):** 0 observations obtenidas
+
+### 6.3 Archivos modificados en `feature/walmart-scraper`
+
+| Archivo | Cambio |
+|---|---|
+| `scraper/adapters/walmart.mjs` | **NUEVO.** Adaptador para Walmart México. Implementado pero bloqueado. |
+| `test/walmart.test.mjs` | **NUEVO.** 10 pruebas unitarias del adaptador. |
+| `scraper/run.mjs` | Registra `walmart` como adaptador en el orquestador. |
+| `package.json` | Script `test` cambiado a `node --test test` (cross-platform). |
+
+### 6.4 Intento 1 — HTTP directo
+
+Se intentó acceder a `walmart.com.mx` directamente mediante peticiones HTTP
+(fetch/node-fetch) para obtener páginas de producto o búsqueda.
+
+**Resultado:** Akamai Bot Manager intercepta la petición y devuelve `HTTP 307`
+redirigiendo a una página de bloqueo/verificación. No se obtuvo ningún precio.
+
+> ❌ **HTTP directo: NO VIABLE.**
+
+### 6.5 Intento 2 — Playwright (navegador real)
+
+Se realizó una prueba de factibilidad con Playwright usando **únicamente 1
+producto**:
+
+- EAN: `7501020513478`
+- Producto: `Leche Lala Entera 1 Litro`
+
+Se probaron dos búsquedas:
+1. Por EAN: `7501020513478`
+2. Por nombre: `"leche lala entera 1 litro"`
+
+**Resultado en ambos casos:** Walmart redirige inmediatamente a la página de
+Akamai "Verifica tu identidad" (`/blocked`). No se cargó ningún resultado de
+producto ni se obtuvo precio alguno.
+
+> ❌ **Playwright con navegador real: NO VIABLE.**
+
+Los archivos de prueba de Playwright se eliminaron del árbol de trabajo para
+mantener el repositorio limpio. El working tree quedó en estado `clean`.
+
+### 6.6 Regla permanente sobre Walmart
+
+> **No utilizar stealth browsers, CAPTCHA solving, proxies para evadir bloqueo,
+> fingerprint spoofing, IP rotation, ni ninguna otra técnica para evadir
+> Akamai/WAF de Walmart.** Un pipeline basado en evasión es frágil, de
+> mantenimiento costoso, y potencialmente viola los términos de servicio.
+
+### 6.7 Investigación de fuentes alternativas — PROFECO
+
+Se investigó el dataset **PROFECO — Quién es Quién en los Precios (QQP)**
+como fuente alternativa para precios de Walmart.
+
+**Dataset analizado:**
+- Archivo: `11-2025_02.csv`
+- URL: `https://repodatos.atdt.gob.mx/api_update/profeco/programa_quien_es_quien_precios_2025/11-2025_02.csv`
+- Last-Modified: Thu, 11 Dec 2025 07:41:27 GMT
+- Tamaño: ~138 MB
+
+**Prueba con `7501020513478 — Leche Lala Entera 1 Litro`:**
+
+| Métrica | Valor |
+|---|---|
+| Observaciones Walmart en QRO | **2** |
+| Sucursal encontrada | `Walmart Sucursal Unidad Plaza de Toros`, Santiago de Querétaro |
+| Precios encontrados | $36.00 (2025/11/18) y $37.00 (2025/11/25) |
+| Mínimo | $36.00 |
+| Máximo | $37.00 |
+| Mediana | $36.50 |
+| Promedio | $36.50 |
+| ¿Existe columna EAN en el CSV? | **No** |
+| Identificación de Walmart | `cadena_comercial = "Wal-mart"` |
+| Identificación de Querétaro | `estado = "Querétaro"` (normalizado) |
+| Fecha de la observación | Individual por fila (`fecha_registro`) |
+
+**Conclusión de PROFECO para Walmart:**
+
+- ✅ Es una fuente pública, legítima y oficial.
+- ✅ Permite obtener precios **observados por encuestadores PROFECO en sucursales Walmart físicas de Querétaro**, con fecha exacta de registro.
+- ⚠️ **NO representa el precio actual de Walmart.** Latencia mínima de semanas, frecuentemente meses.
+- ⚠️ Cobertura limitada: solo 1 sucursal (`Plaza de Toros`) de las múltiples que existen en Querétaro.
+- ⚠️ Sin EAN: el match depende 100% del mapping textual en `scraper/mappings/profeco-queretaro.json`.
+- ⚠️ Solo 2 observaciones en todo noviembre 2025 para esa sucursal.
+
+> **CONCLUSIÓN: `APTO PARA PRECIO HISTÓRICO / REFERENCIA`. NO usar como precio actual de Walmart.**
+
+### 6.8 Fuente adoptada — SerpApi
+
+**SerpApi — Walmart Search API** es la fuente de precios adoptada para Walmart México.
+
+**Endpoint:**
+```
+GET https://serpapi.com/search.json
+  ?engine=walmart
+  &query=<us_item_id>
+  &walmart_domain=walmart.com.mx
+  &api_key={SERPAPI_KEY}
+```
+
+| Criterio | Estado |
+|---|---|
+| ¿Soporta `walmart.com.mx`? | ✅ Sí, mediante `walmart_domain=walmart.com.mx` |
+| ¿Es automatizable? | ✅ Sí, API REST JSON |
+| ¿Requiere autenticación? | ✅ Sí, `SERPAPI_KEY` en variables de entorno |
+| ¿Evade Akamai? | SerpApi gestiona eso en sus servidores. El proyecto no interactúa con Walmart directamente. |
+| ¿Es legítimo? | ✅ SerpApi es un intermediario legal reconocido. |
+| Búsqueda por EAN | ❌ No funciona. EAN de 13 dígitos devuelve 0 resultados. |
+| Consulta directa por `us_item_id` | ✅ **Determinista y verificada** con 10 de 19 productos. |
+| Fallback por nombre | ✅ Funciona. Se usa como rediscovery cuando el ID es inválido o desconocido. |
+| Costo con 1 corrida/semana | 19 req/semana ≈ 76–80 req/mes → dentro del plan gratuito (100 req/mes). |
+| Costo con 2 corridas/semana | ~152 req/mes → **supera el plan gratuito**. Requiere plan de pago. |
+
+> **CONCLUSIÓN: ✅ ADOPTADA E IMPLEMENTADA.** Ver archivos modificados en la sección 6.3.
+
+### 6.9 Precios de Walmart observados durante la investigación
+
+Estos precios se obtuvieron de páginas de Walmart indexadas en buscadores durante
+la investigación. **NO son precios verificados automáticamente. Pueden depender
+de ubicación, inventario, vendedor o modalidad de entrega. No los tratar como
+precios actuales confirmados de Walmart Querétaro.**
+
+#### Coincidencias fuertes / alta confianza
+
+| EAN | Producto | Precio observado |
+|---|---|---|
+| `7501020513478` | Leche Lala Entera 1 Litro | $30 (web) / $36–$37 (PROFECO nov 2025) |
+| `7501030463807` | Huevo Blanco San Juan 30 piezas | $58 |
+| `7750575790` | Queso Panela FUD 400g | $77 |
+| `7500478006030` | Atún Dolores Aleta Amarilla en Agua 140g | $25 |
+| `7501000611027` | Mayonesa McCormick Limón 390g | $60 |
+| `7501060400058` | Nescafé Clásico 120g | $103 |
+| `8076809513487` | Barilla Spaghetti 500g | $29 |
+| `7441029501630` | Pan Blanco Bimbo 620g | $49 |
+| `7501052500125` | Cloralex El Rendidor 950ml | $22 |
+| `7506306200073` | Axion Limón 750ml | $61 |
+| `7501055300083` | Coca-Cola Original 2.5L | $53.50 |
+| `7501064000062` | Corona Extra 6×355ml | $115 |
+| `7501035008041` | Bonafont Natural 6L | $45 |
+
+#### Coincidencias parciales / variante de presentación
+
+| Producto | Situación |
+|---|---|
+| Crema Lala 450ml | Solo se encontró presentación de 426 ml |
+| Nutrioli 850ml | Se encontraron variantes pero no exactamente 850 ml confirmado |
+| Arroz Verde Valle 900g | Se encontró Súper Extra 1 kg, no 900 g |
+| Frijol Verde Valle 900g | Se encontró variante Negro Querétaro 900 g |
+| Pétalo Rendimax 12 rollos | Solo marketplace, no first-party Walmart confiable |
+
+#### No confirmado
+
+| Producto | Situación |
+|---|---|
+| Ariel Doble Poder 1 kg | No confirmado en ninguna fuente |
+
+### 6.10 Arquitectura implementada para el resolver de Walmart
+
+El EAN del catálogo y el `us_item_id` de Walmart no coinciden. La solución
+implementada usa un mapping estático explícito:
+
+```
+EAN (js/data.js)
+  → scraper/mappings/walmart-items.json
+      (EAN → us_item_id, aprobado manualmente)
+  → SerpApi (engine=walmart, walmart_domain=walmart.com.mx)
+      query=<us_item_id>  [consulta directa, determinista]
+        ↓ si ID inválido o no mapeado
+      query=<nombre_producto>  [fallback/rediscovery]
+  → observación estándar:
+      { ean, storeId:'walmart', price, capturedAt, source:'serpapi-walmart',
+        sourceUrl, raw:{ us_item_id, nombre_walmart, matched_by } }
+  → normalize.mjs (validarObservacion → consolidar)
+  → sinks.mjs → data/prices.json + Supabase
+```
+
+**Política de actualización de IDs:**
+El adaptador detecta cuando un ID está inválido o rotado y loggea el nuevo ID
+encontrado por búsqueda de nombre. Un humano actualiza `walmart-items.json`
+y hace commit. Nunca se actualiza automáticamente.
+
+---
+
+## 7. Estado actual
+
+> Última actualización: 2026-09-03
+
+### Walmart
+
+**`IMPLEMENTADO — PENDIENTE DE SERPAPI_KEY EN CI`**
+
+- HTTP directo: ❌ Akamai bloquea
+- Playwright: ❌ Akamai bloquea
+- PROFECO: ✅ disponible pero solo histórico
+- SerpApi: ✅ **adoptado e implementado** en `scraper/adapters/walmart.mjs`
+- `us_item_id` mapeados: **10 de 19** productos en `scraper/mappings/walmart-items.json`
+- 9 productos restantes: en `_sin_mapear`, pasan por fallback de rediscovery por nombre
+
+**Para activar en producción:**
+1. Agregar secreto `SERPAPI_KEY` en GitHub (`Settings → Secrets → Actions`).
+2. Verificar que la frecuencia del cron esté en **1 corrida/semana** (plan gratuito: 100 req/mes).
+3. Correr `node scraper/run.mjs --only walmart --dry-run` con la key configurada.
+4. Revisar el log: los 9 productos sin ID recibirán un nuevo ID vía fallback; actualizar `walmart-items.json`.
+
+### PROFECO
+
+**`DISPONIBLE COMO FUENTE HISTÓRICA/SECUNDARIA`**
+
+Funciona hoy para las cadenas participantes (Walmart, Chedraui, Soriana, La
+Comer, Bodega Aurrera, Oxxo). Latencia de meses. HEB no participa.
+
+### Tests
+
+**`55 PASSED`** — `node --test test`  
+(41 originales + 4 de Chedraui + 10 de Walmart SerpApi = 55)
+
+### Catálogo
+
+**`19 PRODUCTOS`** — fuente de verdad: `js/data.js`
+
+### Branch activa de Walmart
+
+**`feature/walmart-scraper`** — commits `8a0fb1f` (adaptador inicial) + implementación SerpApi
+
+---
+
+## 8. Próxima tarea
+
+> **Activar el adaptador Walmart en CI y completar el mapping de us_item_id.**
+
+### Pasos concretos
+
+1. **Agregar secreto `SERPAPI_KEY`** en GitHub (`Settings → Secrets and variables → Actions → New repository secret`).
+2. **Actualizar el cron del workflow** a 1 corrida/semana si se usa plan gratuito de SerpApi (100 req/mes).
+3. **Primera corrida de validación:**
+   ```bash
+   SERPAPI_KEY=<tu_key> node scraper/run.mjs --only walmart --dry-run
+   ```
+   Revisar el log: cada producto sin ID en el mapping hará una búsqueda por nombre.
+   El log indicará `ℹ️ NUEVO ID ENCONTRADO: EAN xxx → us_item_id: yyy`.
+4. **Actualizar `scraper/mappings/walmart-items.json`** con los IDs descubiertos.
+   Mover cada entrada de `_sin_mapear` a `items` una vez verificada.
+5. **Hacer merge de `feature/walmart-scraper` a `main`** una vez que el dry-run
+   produzca ≥15/19 precios y el equipo esté satisfecho con la cobertura.
+
+### No hacer
+
+- ❌ No evadir Akamai/WAF/CAPTCHA
+- ❌ No usar stealth, proxies, fingerprint spoofing ni técnicas similares
+- ❌ No expandir a más de 19 productos
+- ❌ No repetir los experimentos HTTP/Playwright que ya demostraron el bloqueo
+- ❌ No actualizar `walmart-items.json` automáticamente desde código
+
+---
+
+## 9. Para el siguiente agente
+
+1. **Lee `AGENTS.md`** — contiene instrucciones operativas del proyecto.
+2. **Lee este archivo completo** (`CONTINUIDAD.md`).
+3. **Verifica el estado de Git:**
+   ```bash
+   git branch --show-current   # debe ser: feature/walmart-scraper
+   git status
+   git log --oneline -5
+   ```
+4. **El adaptador Walmart está implementado** con SerpApi. No es necesario reescribirlo.
+   Para probarlo: `SERPAPI_KEY=<key> node scraper/run.mjs --only walmart --dry-run`.
+5. **Los archivos clave del adaptador son:**
+   - `scraper/adapters/walmart.mjs` — lógica de consulta SerpApi
+   - `scraper/mappings/walmart-items.json` — mapping EAN → us_item_id (10 mapeados, 9 sin mapear)
+   - `test/walmart.test.mjs` — 10 pruebas unitarias (55 total en la suite)
+6. **No modificar el esquema de Supabase** — los IDs de Walmart van en el campo `raw` (JSONB).
+7. **No repetir experimentos HTTP/Playwright.** Ya están documentados como NO VIABLES.
+8. **Mantener el alcance en los 19 productos de `js/data.js`.**
+9. **Ante la duda, consultar `AGENTS.md` y esta sección 9.**
