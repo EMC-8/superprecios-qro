@@ -21,22 +21,49 @@ const PRICES_JSON = path.join(ROOT, 'data', 'prices.json');
 // data/prices.json
 // ---------------------------------------------------------------------------
 
-/**
- * Reescribe data/prices.json con las observaciones consolidadas.
- * Conserva los precios previos de las tiendas que esta corrida no tocó, para
- * que un adaptador que sólo cubre 5 cadenas no borre la sexta.
- */
-export async function escribirPricesJson(observaciones, meta = {}) {
+export async function escribirPricesJson(observaciones, meta = {}, rutaArchivo = PRICES_JSON) {
+  let baseDoc = null;
+  try {
+    const raw = await readFile(rutaArchivo, 'utf8');
+    baseDoc = JSON.parse(raw);
+  } catch {
+    // Si el archivo no existe o no es JSON válido, se parte de vacío
+  }
+
   const products = {};
+  if (baseDoc?.products && typeof baseDoc.products === 'object') {
+    for (const [ean, byStore] of Object.entries(baseDoc.products)) {
+      if (byStore && typeof byStore === 'object') {
+        products[ean] = { ...byStore };
+      }
+    }
+  }
+
   for (const obs of observaciones) {
     if (!products[obs.ean]) products[obs.ean] = {};
     products[obs.ean][obs.storeId] = obs.price;
   }
 
+  const esParcial = Boolean(meta.esParcial);
+  let source = meta.source || 'scraper';
+  let sourceLabel = meta.sourceLabel || 'Scraper automatizado';
+
+  if (esParcial && baseDoc?.source) {
+    const prevSources = (baseDoc.source || '').split('+').filter(Boolean);
+    const newSources = (meta.source || '').split('+').filter(Boolean);
+    source = Array.from(new Set([...prevSources, ...newSources])).join('+');
+
+    if (baseDoc.sourceLabel && !baseDoc.sourceLabel.includes(meta.sourceLabel)) {
+      sourceLabel = `${baseDoc.sourceLabel} + ${meta.sourceLabel}`;
+    } else if (baseDoc.sourceLabel) {
+      sourceLabel = baseDoc.sourceLabel;
+    }
+  }
+
   const documento = {
     generatedAt: new Date().toISOString(),
-    source: meta.source || 'scraper',
-    sourceLabel: meta.sourceLabel || 'Scraper automatizado',
+    source,
+    sourceLabel,
     currency: 'MXN',
     region: 'Queretaro, Qro., MX',
     postalCode: '76000',
@@ -47,8 +74,8 @@ export async function escribirPricesJson(observaciones, meta = {}) {
     )
   };
 
-  await writeFile(PRICES_JSON, JSON.stringify(documento, null, 2) + '\n', 'utf8');
-  return { ruta: path.relative(ROOT, PRICES_JSON), productos: Object.keys(documento.products).length };
+  await writeFile(rutaArchivo, JSON.stringify(documento, null, 2) + '\n', 'utf8');
+  return { ruta: path.relative(ROOT, rutaArchivo), productos: Object.keys(documento.products).length };
 }
 
 // ---------------------------------------------------------------------------
