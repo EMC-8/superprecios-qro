@@ -154,7 +154,8 @@ try {
 
 const archivo = await escribirPricesJson(consolidadas, {
   source: seleccionados.map(a => a.id).join('+'),
-  sourceLabel: seleccionados.map(a => a.nombre).join(' + ')
+  sourceLabel: seleccionados.map(a => a.nombre).join(' + '),
+  esParcial: Boolean(soloUno)
 });
 log(`  ✔ ${archivo.ruta} (${archivo.productos} productos)`);
 
