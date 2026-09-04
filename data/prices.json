@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-29T22:48:19.996Z",
-  "source": "chedraui",
-  "sourceLabel": "Chedraui (Sitio Oficial)",
+  "generatedAt": "2026-08-31T16:43:12.214Z",
+  "source": "chedraui+profeco+manual",
+  "sourceLabel": "Chedraui (Sitio Oficial) + PROFECO — Quién es Quién en los Precios + Captura manual (CSV)",
   "currency": "MXN",
   "region": "Queretaro, Qro., MX",
   "postalCode": "76000",
@@ -15,16 +15,16 @@
       "walmart": 45
     },
     "7501000111204": {
-      "aurrera": 49,
-      "chedraui": 54,
+      "aurrera": 47.5,
+      "chedraui": 41,
       "heb": 52.5,
-      "lacomer": 56,
-      "soriana": 53.9,
-      "walmart": 52
+      "lacomer": 53,
+      "soriana": 41,
+      "walmart": 41.5
     },
     "7501003601559": {
       "aurrera": 34,
-      "chedraui": 37.5,
+      "chedraui": 45,
       "heb": 36.5,
       "lacomer": 41,
       "soriana": 36,
@@ -39,12 +39,12 @@
       "walmart": 49
     },
     "7501020513478": {
-      "aurrera": 29,
-      "chedraui": 33,
+      "aurrera": 31,
+      "chedraui": 38,
       "heb": 29.9,
-      "lacomer": 31.5,
-      "soriana": 30.5,
-      "walmart": 30
+      "lacomer": 37,
+      "soriana": 34,
+      "walmart": 36.5
     },
     "7501020521015": {
       "aurrera": 29,
@@ -64,10 +64,10 @@
     },
     "7501039100063": {
       "aurrera": 39.9,
-      "chedraui": 41.9,
+      "chedraui": 41.2,
       "heb": 42.5,
-      "lacomer": 46,
-      "soriana": 42.9,
+      "lacomer": 40.5,
+      "soriana": 41.45,
       "walmart": 43
     },
     "7501040001019": {
@@ -79,12 +79,12 @@
       "walmart": 68
     },
     "7501045401340": {
-      "aurrera": 20.9,
+      "aurrera": 23.5,
       "chedraui": 38,
       "heb": 22.5,
       "lacomer": 25,
-      "soriana": 22.5,
-      "walmart": 23
+      "soriana": 20.9,
+      "walmart": 24
     },
     "7501055304745": {
       "aurrera": 36,
@@ -120,33 +120,33 @@
     },
     "7501078100119": {
       "aurrera": 34.5,
-      "chedraui": 25.5,
+      "chedraui": 34,
       "heb": 37.9,
-      "lacomer": 41.5,
+      "lacomer": 34.5,
       "soriana": 37.5,
       "walmart": 38
     },
     "7501078100232": {
       "aurrera": 39.9,
-      "chedraui": 30,
+      "chedraui": 51.5,
       "heb": 43.5,
-      "lacomer": 47,
+      "lacomer": 52.45,
       "soriana": 43.9,
       "walmart": 44.5
     },
     "7501166300405": {
-      "aurrera": 64,
-      "chedraui": 63,
+      "aurrera": 88,
+      "chedraui": 77.5,
       "heb": 62,
-      "lacomer": 72,
-      "soriana": 64.9,
-      "walmart": 66
+      "lacomer": 91,
+      "soriana": 91.9,
+      "walmart": 89
     },
     "7501943440129": {
       "aurrera": 85.5,
       "chedraui": 119,
       "heb": 91.5,
-      "lacomer": 99,
+      "lacomer": 111,
       "soriana": 89.9,
       "walmart": 92
     },

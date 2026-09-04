@@ -27,16 +27,9 @@ const PRICES_JSON = path.join(ROOT, 'data', 'prices.json');
  * que un adaptador que sólo cubre 5 cadenas no borre la sexta.
  */
 export async function escribirPricesJson(observaciones, meta = {}) {
-  let previo = { products: {} };
-  try {
-    previo = JSON.parse(await readFile(PRICES_JSON, 'utf8'));
-  } catch (e) {
-    // Primera corrida: se parte de cero.
-  }
-
-  const products = { ...(previo.products || {}) };
+  const products = {};
   for (const obs of observaciones) {
-    if (!products[obs.ean]) products[obs.ean] = { ...(previo.products?.[obs.ean] || {}) };
+    if (!products[obs.ean]) products[obs.ean] = {};
     products[obs.ean][obs.storeId] = obs.price;
   }
 

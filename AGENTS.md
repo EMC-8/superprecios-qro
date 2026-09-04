@@ -33,6 +33,20 @@ qué antes de escribir código.
 
 ## Reglas duras
 
+## Git y ramas
+
+- Nunca trabajar directamente sobre `main`.
+- `main` es la rama estable y protegida.
+- Todo cambio debe comenzar desde una rama de trabajo.
+- Una rama debe corresponder a una sola tarea.
+- Nunca hacer push directo a `main`.
+- Nunca hacer merge a `main` sin revisión humana.
+- Antes de comenzar, verifica la rama actual.
+- Antes de crear un PR, ejecuta las pruebas correspondientes.
+- El agente puede crear commits y subir su rama, pero no debe hacer merge a `main`.
+- Si detectas cambios de otra persona en la rama de trabajo, no los sobrescribas.
+- Si existe un conflicto, detente y repórtalo.
+
 Romper cualquiera de estas rompe el producto de forma silenciosa. Están
 cubiertas por pruebas: **si una prueba falla por tu cambio, asume que el cambio
 está mal, no la prueba.** Si de verdad la prueba está mal, di explícitamente por
