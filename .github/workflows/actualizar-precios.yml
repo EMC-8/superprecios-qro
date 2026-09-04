@@ -4,13 +4,13 @@ name: Actualizar precios
 # Al commitear, Vercel redespliega solo y la PWA queda con los precios nuevos.
 on:
   schedule:
-    # Lunes y jueves a las 9:00 UTC (3:00 AM en Querétaro).
-    # PROFECO publica quincenalmente, así que dos veces por semana es de sobra.
-    - cron: '0 9 * * 1,4'
+    # Lunes, miércoles y viernes a las 9:00 UTC (3:00 AM en Querétaro).
+    # 3 ejecuciones semanales: suficiente para monitoreo de precios, no tiempo real.
+    - cron: '0 9 * * 1,3,5'
   workflow_dispatch:
     inputs:
       solo:
-        description: 'Correr un único adaptador (profeco | manual)'
+        description: 'Correr un único adaptador (profeco | walmart | manual)'
         required: false
         type: string
 
@@ -31,6 +31,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
         run: |
           if [ -n "${{ inputs.solo }}" ]; then
             node scraper/run.mjs --only "${{ inputs.solo }}"
