@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-04T20:32:01.567Z",
+  "generatedAt": "2026-09-09T13:35:59.090Z",
   "source": "chedraui+profeco+manual+walmart",
   "sourceLabel": "Chedraui (Sitio Oficial) + PROFECO — Quién es Quién en los Precios + Captura manual (CSV) + Walmart México (SerpApi)",
   "currency": "MXN",
@@ -8,7 +8,7 @@
   "products": {
     "7500435128031": {
       "aurrera": 41,
-      "chedraui": 40,
+      "chedraui": 42,
       "heb": 44.5,
       "lacomer": 49,
       "soriana": 44,
@@ -20,7 +20,7 @@
       "heb": 52.5,
       "lacomer": 53,
       "soriana": 41,
-      "walmart": 49
+      "walmart": 42
     },
     "7501003601559": {
       "aurrera": 34,
@@ -44,7 +44,7 @@
       "heb": 29.9,
       "lacomer": 37,
       "soriana": 34,
-      "walmart": 30
+      "walmart": 36
     },
     "7501020521015": {
       "aurrera": 29,
@@ -64,7 +64,7 @@
     },
     "7501039100063": {
       "aurrera": 39.9,
-      "chedraui": 41.2,
+      "chedraui": 42.7,
       "heb": 42.5,
       "lacomer": 40.5,
       "soriana": 41.45,
@@ -72,7 +72,7 @@
     },
     "7501040001019": {
       "aurrera": 64,
-      "chedraui": 77,
+      "chedraui": 71,
       "heb": 69.5,
       "lacomer": 74,
       "soriana": 67,
@@ -84,7 +84,7 @@
       "heb": 22.5,
       "lacomer": 25,
       "soriana": 20.9,
-      "walmart": 25
+      "walmart": 24
     },
     "7501055304745": {
       "aurrera": 36,
@@ -104,7 +104,7 @@
     },
     "7501064191343": {
       "aurrera": 96,
-      "chedraui": 108,
+      "chedraui": 103,
       "heb": 100,
       "lacomer": 110,
       "soriana": 102,
@@ -136,11 +136,11 @@
     },
     "7501166300405": {
       "aurrera": 88,
-      "chedraui": 77.5,
+      "chedraui": 79.5,
       "heb": 62,
       "lacomer": 91,
       "soriana": 91.9,
-      "walmart": 58
+      "walmart": 89
     },
     "7501943440129": {
       "aurrera": 85.5,
@@ -152,7 +152,7 @@
     },
     "7509546071856": {
       "aurrera": 36,
-      "chedraui": 43,
+      "chedraui": 45,
       "heb": 39,
       "lacomer": 43.5,
       "soriana": 38.9,
